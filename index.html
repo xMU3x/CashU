@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Surgery Department Cases</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2f6fed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Surgery Cases">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#f3f6fb;--s1:#ffffff;--s2:#f6f9fd;--s3:#eaf1fb;
+  --border:#dfe7f2;--border2:#cfdbec;
+  --teal:#2f6fed;--teal-dim:rgba(47,111,237,.10);--teal-glow:rgba(47,111,237,.20);
+  --blue:#2f6fed;--blue-dim:rgba(47,111,237,.10);
+  --green:#16a34a;--green-dim:rgba(22,163,74,.10);
+  --red:#dc2626;--red-dim:rgba(220,38,38,.08);
+  --amber:#d97706;--amber-dim:rgba(217,119,6,.10);
+  --text:#0f172a;--t2:#64748b;--t3:#94a3b8;
+  --r:14px;--rs:10px;
+}
+[data-theme="dark"]{
+  --bg:#0b1220;--s1:#111a2c;--s2:#0f1729;--s3:#17233b;
+  --border:#233150;--border2:#2c3c5e;
+  --teal:#5b8def;--teal-dim:rgba(91,141,239,.16);--teal-glow:rgba(91,141,239,.28);
+  --blue:#5b8def;--blue-dim:rgba(91,141,239,.16);
+  --green:#22c55e;--green-dim:rgba(34,197,94,.14);
+  --red:#f87171;--red-dim:rgba(248,113,113,.14);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,.14);
+  --text:#e7edf7;--t2:#93a3bd;--t3:#6b7c9c;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .2s,color .2s;}
+.theme-toggle{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:var(--rs);width:38px;height:38px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+.theme-toggle:hover{border-color:var(--teal);}
+
+.hdr{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(170deg,var(--s3) 0%,var(--bg) 85%);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+.hdr-left{display:flex;align-items:center;gap:12px;min-width:0;}
+.hdr-icon{font-size:1.8rem;filter:drop-shadow(0 0 10px var(--teal-glow));flex-shrink:0;}
+.hdr h1{font-size:1.2rem;font-weight:800;}
+.hdr p{color:var(--t2);font-size:.76rem;margin-top:2px;}
+.hdr-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+.btn{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:var(--rs);padding:10px 16px;font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn:hover{border-color:var(--teal);}
+.btn-primary{background:var(--teal);color:#ffffff;border:none;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(231,76,60,.3);}
+
+.wrap{max-width:1500px;margin:0 auto;padding:18px 16px 60px;width:100%;}
+
+.tabs{display:flex;gap:8px;background:var(--s1);border:1px solid var(--border);border-radius:50px;padding:5px;margin-bottom:16px;width:fit-content;max-width:100%;}
+.tab{padding:9px 20px;border-radius:50px;font-size:.85rem;font-weight:700;color:var(--t2);cursor:pointer;transition:.2s;white-space:nowrap;}
+.tab.active{background:var(--teal);color:#ffffff;}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.searchbar{flex:1;min-width:200px;}
+.searchbar input{width:100%;background:var(--s1);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:inherit;font-size:.87rem;}
+.searchbar input:focus{outline:none;border-color:var(--teal);}
+
+.empty{text-align:center;padding:60px 20px;color:var(--t2);}
+.empty-icon{font-size:2.4rem;margin-bottom:10px;display:block;}
+.loading{text-align:center;padding:40px;color:var(--t2);}
+
+/* ---- Simple table list (rows & columns) ---- */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--r);background:var(--s1);max-width:100%;}
+table{border-collapse:collapse;width:100%;min-width:1680px;}
+thead th{position:sticky;top:0;background:var(--s2);color:var(--teal);font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;font-weight:800;padding:12px 14px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap;}
+tbody td{padding:12px 14px;font-size:.82rem;border-bottom:1px solid var(--border);vertical-align:top;max-width:220px;}
+tbody td.wrap-cell{white-space:pre-wrap;word-break:break-word;}
+tbody td.nowrap{white-space:nowrap;}
+tbody tr{cursor:pointer;transition:.12s;}
+tbody tr:hover{background:var(--s2);}
+tbody tr:last-child td{border-bottom:none;}
+.pt-name{font-weight:800;color:var(--text);}
+.role-badge{display:inline-block;background:var(--s3);border:1px solid var(--border2);padding:4px 11px;border-radius:8px;font-weight:700;color:var(--text);}
+.diag-col{width:230px;min-width:200px;max-width:230px;}
+.diag-cell{white-space:normal;word-break:break-word;line-height:1.5;}
+.pill{display:inline-block;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:50px;background:var(--teal-dim);color:var(--teal);white-space:nowrap;}
+.pill-archived{background:rgba(255,255,255,.06);color:var(--t2);}
+.pill-amber{background:var(--amber-dim);color:var(--amber);}
+.rowactions{display:flex;gap:6px;}
+.icon-btn{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:8px;width:30px;height:30px;font-size:.85rem;cursor:pointer;flex-shrink:0;}
+.icon-btn:hover{border-color:var(--teal);}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:center;justify-content:center;padding:16px;}
+.overlay.active{display:flex;}
+.sheet{background:var(--bg);width:100%;max-width:760px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:16px;border:1px solid var(--border);animation:up .2s ease;}
+.pw-sheet{max-width:380px;}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.sheet-hdr{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:5;}
+.sheet-hdr h2{font-size:1.05rem;font-weight:800;}
+.close-btn{background:var(--s2);border:none;color:var(--text);width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;flex-shrink:0;}
+.sheet-body{padding:20px;}
+
+.field{margin-bottom:14px;min-width:0;}
+.field label{display:block;font-size:.76rem;font-weight:800;color:var(--teal);margin-bottom:6px;text-transform:uppercase;letter-spacing:.02em;}
+.field input,.field textarea,.field select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:11px 13px;color:var(--text);font-family:inherit;font-size:.88rem;}
+.field textarea{min-height:60px;resize:vertical;}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--teal);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+.subhdr{font-size:.78rem;font-weight:800;color:var(--t2);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px dashed var(--border2);text-transform:uppercase;letter-spacing:.03em;}
+
+.settings-list{margin-bottom:16px;}
+.settings-row{display:flex;gap:8px;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;margin-bottom:8px;}
+.settings-row input{flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:.88rem;}
+.settings-row input:focus{outline:none;}
+.settings-row .rm{background:var(--red-dim);color:var(--red);border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;flex-shrink:0;}
+.add-row-btn{width:100%;background:var(--s2);border:1px dashed var(--border2);color:var(--teal);border-radius:var(--rs);padding:10px;font-family:inherit;font-weight:700;font-size:.83rem;cursor:pointer;text-align:center;display:block;}
+.hint{font-size:.74rem;color:var(--t2);margin-bottom:10px;}
+
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);color:var(--text);padding:10px 20px;border-radius:50px;font-size:.85rem;font-weight:700;z-index:100;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;}
+
+@media(max-width:480px){
+  .wrap{padding:14px 10px 50px;}
+  .hdr{padding:14px 12px;}
+  .hdr h1{font-size:1.05rem;}
+  .hdr p{font-size:.7rem;}
+  .btn{padding:9px 12px;font-size:.8rem;}
+  .sheet-body{padding:14px;}
+}
+
+/* ---- Login screen ---- */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+#loginScreen.hidden{display:none;}
+.login-card{width:100%;max-width:380px;background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:30px 26px;}
+.login-logo{font-size:2.4rem;text-align:center;margin-bottom:6px;}
+.login-card h1{font-size:1.15rem;font-weight:800;text-align:center;margin-bottom:4px;}
+.login-card p.sub{color:var(--t2);font-size:.8rem;text-align:center;margin-bottom:22px;}
+.login-error{background:var(--red-dim);color:var(--red);border:1px solid rgba(231,76,60,.3);border-radius:var(--rs);padding:10px 12px;font-size:.82rem;margin-bottom:14px;display:none;}
+.login-error.show{display:block;}
+
+/* ---- Header user chip ---- */
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border2);border-radius:50px;padding:6px 14px 6px 6px;font-size:.8rem;font-weight:700;}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--teal-dim);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0;}
+.logout-link{background:none;border:none;color:var(--t2);font-family:inherit;font-size:.72rem;cursor:pointer;text-decoration:underline;padding:0;margin-inline-start:6px;}
+.logout-link:hover{color:var(--red);}
+
+/* ---- Registered/edited-by trail ---- */
+.by-col{min-width:150px;}
+.by-cell{font-size:.74rem;line-height:1.5;color:var(--t2);}
+.by-cell b{color:var(--text);font-weight:700;}
+.trail-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;font-size:.78rem;color:var(--t2);margin-bottom:14px;line-height:1.7;}
+.trail-box b{color:var(--text);}
+
+/* ---- Doctors management ---- */
+.doctor-row{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;}
+.doctor-info{flex:1;min-width:0;}
+.doctor-name{font-weight:800;font-size:.86rem;}
+.doctor-email{font-size:.74rem;color:var(--t2);}
+.doctor-badge{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:50px;background:var(--blue-dim);color:var(--blue);margin-inline-start:6px;}
+.doctor-badge.disabled{background:rgba(255,255,255,.06);color:var(--t2);}
+.doctor-toggle{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:6px 12px;font-family:inherit;font-weight:700;font-size:.76rem;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.doctor-toggle.enable{color:var(--green);}
+.doctor-toggle.disable{color:var(--red);}
+.doctor-actions{display:flex;gap:6px;flex-shrink:0;}
+.doctor-mini-btn{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:8px;width:30px;height:30px;font-size:.8rem;cursor:pointer;flex-shrink:0;}
+.doctor-mini-btn:hover{border-color:var(--teal);}
+.doctor-mini-btn.danger{color:var(--red);}
+
+/* ---- Bulk selection bar (admin only) ---- */
+.bulkbar{display:none;align-items:center;gap:10px;background:var(--teal-dim);border:1px solid rgba(31,182,166,.35);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;flex-wrap:wrap;}
+.bulkbar.active{display:flex;}
+.bulkbar .count{font-weight:800;color:var(--teal);font-size:.85rem;}
+.bulkbar .spacer{flex:1;}
+.select-all-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--t2);font-size:.8rem;font-weight:700;}
+.case-check{width:18px;height:18px;accent-color:var(--teal);cursor:pointer;flex-shrink:0;}
+
+/* ---- Interactive case cards (main interface): stacked list, one case per row ---- */
+.cards-grid{display:flex;flex-direction:column;gap:7px;}
+.case-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;transition:.15s;cursor:pointer;position:relative;}
+.case-card:hover{border-color:var(--teal);box-shadow:0 4px 16px rgba(15,23,42,.08);transform:translateY(-1px);}
+.case-row{display:flex;align-items:flex-start;gap:11px;}
+.case-date{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:36px;flex-shrink:0;padding-top:1px;}
+.case-date-mon{font-size:.6rem;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.03em;}
+.case-date-day{font-size:.98rem;font-weight:800;color:var(--text);line-height:1.15;}
+.case-main{flex:1;min-width:0;}
+.case-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px;}
+.case-card-select{margin-top:2px;}
+.case-card-name{font-weight:800;font-size:.8rem;color:var(--text);display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0;}
+.case-card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;}
+.case-card-actions{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
+.case-card-actions .icon-btn{width:22px;height:22px;font-size:.66rem;}
+.case-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.case-card-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:5px 12px;padding:6px 8px;margin-bottom:6px;background:var(--s2);border:1px solid var(--border);border-radius:8px;}
+.info-item{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--t2);min-width:0;}
+.info-item .info-ic{font-size:.72rem;flex-shrink:0;opacity:.85;}
+.info-item span.v{color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.case-card-brief{display:flex;flex-wrap:wrap;gap:16px;font-size:.68rem;color:var(--t2);margin-bottom:4px;}
+.case-card-brief b{color:var(--text);font-weight:700;}
+.case-card-brief-col{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.case-card-diag{font-size:.76rem;font-weight:700;color:var(--text);line-height:1.4;margin:0 0 6px;padding:5px 9px;background:rgba(14,148,136,.09);border-inline-start:3px solid var(--teal);border-radius:6px;}
+.role-chip{display:inline-block;font-size:.64rem;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;line-height:1.5;border:1px solid transparent;}
+.role-chip-senior{background:rgba(47,111,237,.10);color:#1d4ed8;border-color:rgba(47,111,237,.25);}
+.role-chip-consultant{background:rgba(14,148,136,.10);color:#0f766e;border-color:rgba(14,148,136,.25);}
+.role-chip-department{background:rgba(217,119,6,.10);color:#b45309;border-color:rgba(217,119,6,.25);}
+.case-card-vitals{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
+.vital-chip{display:inline-flex;align-items:center;gap:4px;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:50px;background:var(--blue-dim);color:var(--blue);white-space:nowrap;}
+.case-card-toggle{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.66rem;font-weight:700;color:var(--teal);padding:4px 0;border-top:1px dashed var(--border2);}
+.case-card-details{display:none;grid-template-columns:1fr 1fr;gap:5px 12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:.7rem;}
+.case-card-details.open{display:grid;}
+.case-card-details .cd-item{min-width:0;}
+.case-card-details .cd-item span.k{display:block;color:var(--teal);font-weight:800;font-size:.64rem;text-transform:uppercase;letter-spacing:.02em;margin-bottom:2px;}
+.case-card-details .cd-item span.v{color:var(--text);white-space:pre-wrap;word-break:break-word;}
+.case-card-details .cd-full{grid-column:1/-1;}
+.btn-exit{background:rgba(245,166,35,.13);color:var(--amber);border:1px solid rgba(245,166,35,.3);}
+.btn-exit:hover{border-color:var(--amber);}
+
+/* ---- Notes / Requests task cards (shown above the case list) ---- */
+.tasks-wrap{margin-bottom:20px;}
+.tasks-hdr{font-size:.78rem;font-weight:800;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.03em;}
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.task-card{background:var(--s1);border:1px solid var(--border2);border-left:3px solid var(--amber);border-radius:var(--rs);padding:10px 13px;}
+.task-card.done{border-left-color:var(--green);}
+.task-card.unavailable{border-left-color:var(--red);}
+.task-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;}
+.task-card-pt{font-weight:800;font-size:.82rem;margin-bottom:2px;}
+.task-card-text{font-size:.8rem;color:var(--text);margin-bottom:8px;line-height:1.4;}
+.task-hide-btn{background:var(--s3);border:1px solid var(--border2);color:var(--t2);border-radius:7px;width:24px;height:24px;font-size:.72rem;cursor:pointer;flex-shrink:0;}
+.task-hide-btn:hover{border-color:var(--teal);color:var(--teal);}
+.task-status-row{display:flex;gap:6px;flex-wrap:wrap;}
+.task-status-btn{flex:1;background:var(--s3);border:1px solid var(--border2);color:var(--t2);border-radius:7px;padding:5px 6px;font-family:inherit;font-size:.68rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+.task-status-btn.active-done{background:var(--green-dim);color:var(--green);border-color:rgba(46,204,113,.35);}
+.task-status-btn.active-pending{background:var(--amber-dim);color:var(--amber);border-color:rgba(245,166,35,.35);}
+.task-status-btn.active-unavailable{background:var(--red-dim);color:var(--red);border-color:rgba(231,76,60,.35);}
+
+/* ---- Vitality sub-fields & Notes/Requests rows in the form ---- */
+.vital-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+@media(max-width:640px){.vital-grid{grid-template-columns:1fr 1fr;}}
+.vital-grid .field{margin-bottom:0;}
+.request-row{display:flex;gap:8px;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;margin-bottom:8px;flex-wrap:wrap;}
+.request-row input[type=text]{flex:1;min-width:140px;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:.85rem;}
+.request-row input[type=text]:focus{outline:none;}
+.request-row select{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:6px 8px;font-family:inherit;font-size:.76rem;}
+.request-row .rm{background:var(--red-dim);color:var(--red);border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- Login screen (real Supabase Auth) -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🏥</div>
+    <h1>Surgery Department Cases</h1>
+    <p class="sub">تسجيل الدخول للأطباء — Sign in with your doctor account</p>
+    <div class="login-error" id="loginError"></div>
+    <div class="field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" placeholder="doctor@example.com" onkeydown="if(event.key==='Enter'){document.getElementById('loginPassword').focus();}"></div>
+    <div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();signIn();}"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:6px;" onclick="signIn()" id="loginBtn">Sign in</button>
+  </div>
+</div>
+
+<div id="appRoot" class="hidden" style="display:none">
+
+<div class="hdr">
+  <div class="hdr-left">
+    <span class="hdr-icon">🏥</span>
+    <div>
+      <h1>Surgery Department Cases</h1>
+      <p>Full tracking for every case in the department</p>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+    <span class="user-chip" id="userChip"></span>
+    <button class="btn" id="installBtn" style="display:none" onclick="promptInstall()">📲 Install</button>
+    <button class="btn" id="settingsBtn" style="display:none" onclick="openSettings()">⚙️ Settings</button>
+    <button class="btn btn-primary" onclick="openForm()">＋ New Case</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab active" data-tab="active" onclick="switchTab('active')">Active Cases</div>
+    <div class="tab" data-tab="archived" onclick="switchTab('archived')">Archive</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="searchbar"><input type="text" id="searchInput" placeholder="🔍 Search by name, senior, or consultant..." oninput="renderList()"></div>
+  </div>
+
+  <!-- Bulk select bar: Admin-only feature to select multiple cases and
+       edit/delete them together. Hidden entirely for non-admin doctors. -->
+  <div class="select-all-row" id="selectAllRow" style="display:none">
+    <input type="checkbox" class="case-check" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)">
+    <span>Select all</span>
+  </div>
+  <div class="bulkbar" id="bulkBar">
+    <span class="count" id="bulkCount">0 selected</span>
+    <div class="spacer"></div>
+    <button class="btn" onclick="openBulkEdit()">✏️ Bulk Edit</button>
+    <button class="btn btn-danger" onclick="confirmBulkDelete()">🗑️ Delete Selected</button>
+    <button class="btn" onclick="clearSelection()">✕ Clear</button>
+  </div>
+
+  <!-- Notes/Requests shown as tasks, above the case list -->
+  <div class="tasks-wrap" id="tasksWrap" style="display:none">
+    <div class="tasks-hdr">📋 Open Requests</div>
+    <div class="tasks-grid" id="tasksArea"></div>
+  </div>
+
+  <div id="listArea"><div class="loading">Loading...</div></div>
+</div>
+
+<!-- Add/Edit Sheet -->
+<div class="overlay" id="formOverlay">
+  <div class="sheet">
+    <div class="sheet-hdr">
+      <h2 id="formTitle">New Case</h2>
+      <button class="close-btn" onclick="closeForm()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <input type="hidden" id="f_id">
+      <div class="trail-box" id="f_trailBox" style="display:none"></div>
+      <div class="field"><label>Senior</label><select id="f_senior"></select></div>
+      <div class="field"><label>Pt. Name *</label><input id="f_ptName" placeholder="Patient full name"></div>
+      <div class="grid3">
+        <div class="field"><label>Consultant</label><select id="f_consultant"></select></div>
+        <div class="field"><label>Department</label><select id="f_department"></select></div>
+        <div class="field"><label>Age</label><input id="f_age" type="number" placeholder="Age"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Day / Admission</label><input id="f_admission" type="date"></div>
+        <div class="field"><label>Day out</label><input id="f_dayOut" type="date"></div>
+      </div>
+      <div class="field"><label>Diagnosis</label><textarea id="f_diagnosis" placeholder="Diagnosis"></textarea></div>
+
+      <div class="subhdr">Clinical Status</div>
+      <div class="field">
+        <label>Vitality</label>
+        <div class="hint">Fill in only what applies — each one only shows on the main screen if it has data, and they're all grouped together under the Vitality column.</div>
+        <div class="vital-grid">
+          <input id="f_vital_bp" placeholder="BP (e.g. 120/80)">
+          <input id="f_vital_pr" placeholder="PR (e.g. 78 bpm)">
+          <input id="f_vital_temp" placeholder="Temp (e.g. 37.1°C)">
+          <input id="f_vital_rr" placeholder="RR (e.g. 16/min)">
+          <input id="f_vital_spo2" placeholder="SpO2 (e.g. 98%)">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Feeding</label><input id="f_feeding" placeholder="NPO / Oral / NG tube..."></div>
+        <div class="field"><label>Drain</label><input id="f_drain" placeholder="Drain type & amount"></div>
+      </div>
+
+      <div class="subhdr">Investigation</div>
+      <div class="field"><label>Investigation</label><textarea id="f_investigation" placeholder="General investigation notes"></textarea></div>
+      <div class="grid2">
+        <div class="field"><label>Labs</label><textarea id="f_labs" placeholder="Lab results"></textarea></div>
+        <div class="field"><label>Rads</label><textarea id="f_rads" placeholder="Radiology results"></textarea></div>
+      </div>
+
+      <div class="field"><label>Notes</label><textarea id="f_notes" placeholder="Additional notes"></textarea></div>
+
+      <div class="subhdr">Notes / Requests</div>
+      <div class="hint">Add things that need to be done for this case throughout the day. These show as task cards above the case list on the main screen, each with a status button.</div>
+      <div id="requestsList"></div>
+      <button type="button" class="add-row-btn" onclick="addRequestRow()">＋ Add request</button>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:16px;" onclick="saveCase()">💾 Save Case</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Sheet -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet">
+    <div class="sheet-hdr">
+      <h2>Settings</h2>
+      <button class="close-btn" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="subhdr">Seniors</div>
+      <div class="hint">These names appear in the Senior dropdown when adding a case. Add as many as you need.</div>
+      <div class="settings-list" id="seniorsList"></div>
+      <button class="add-row-btn" onclick="addSettingsRow('seniors')">＋ Add senior</button>
+
+      <div class="subhdr" style="margin-top:24px;">Consultants</div>
+      <div class="hint">These names appear in the Consultant dropdown when adding a case. Add as many as you need.</div>
+      <div class="settings-list" id="consultantsList"></div>
+      <button class="add-row-btn" onclick="addSettingsRow('consultants')">＋ Add consultant</button>
+
+      <div class="subhdr" style="margin-top:24px;">Departments</div>
+      <div class="hint">Customize the department/unit list (e.g. Surgery A, Surgery B, ICU 6th Floor...). Cases are grouped and color-coded by department.</div>
+      <div class="settings-list" id="departmentsList"></div>
+      <button class="add-row-btn" onclick="addSettingsRow('departments')">＋ Add department</button>
+
+      <div id="doctorsSection" style="display:none">
+        <div class="subhdr" style="margin-top:24px;">Doctors (Accounts)</div>
+        <div class="hint">Create a login for each doctor, or disable a doctor who has left the department. Disabling only blocks their login — every case they registered or edited stays exactly as it is.</div>
+        <div id="doctorsList"></div>
+        <div class="grid2" style="margin-top:10px;">
+          <div class="field"><label>Full name</label><input id="newDoctorName" placeholder="Dr. Full Name"></div>
+          <div class="field"><label>Role</label>
+            <select id="newDoctorRole"><option value="doctor">Doctor</option><option value="admin">Admin</option></select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Email</label><input id="newDoctorEmail" type="email" placeholder="doctor@example.com"></div>
+          <div class="field"><label>Password</label><input id="newDoctorPassword" type="password" placeholder="At least 6 characters"></div>
+        </div>
+        <button class="add-row-btn" onclick="createDoctor()">＋ Create doctor account</button>
+      </div>
+
+      <div class="subhdr" style="margin-top:24px;">App Install</div>
+      <div class="hint">Show or hide the "Install" button next to Settings in the header.</div>
+      <label style="display:flex;align-items:center;gap:9px;cursor:pointer;margin-bottom:14px;">
+        <input type="checkbox" id="showInstallToggle" style="width:18px;height:18px;flex-shrink:0;">
+        <span style="font-size:.85rem;">Show install option in header</span>
+      </label>
+
+      <div class="subhdr" style="margin-top:24px;">Data Export</div>
+      <div class="hint">Export every recorded case (active + archived) with all its data into an Excel file.</div>
+      <button class="btn" style="width:100%;justify-content:center;padding:12px;margin-bottom:8px;" onclick="exportToExcel()">📊 Export to Excel</button>
+
+      <div class="subhdr" style="margin-top:24px;">Security</div>
+      <div class="hint">Leave blank to keep the current password. This password is required to open Settings and to delete a case.</div>
+      <div class="field"><input type="password" id="newPasswordInput" placeholder="Set a new password (optional)"></div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:20px;" onclick="saveSettings()">💾 Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password Sheet -->
+<div class="overlay" id="pwOverlay">
+  <div class="sheet pw-sheet">
+    <div class="sheet-hdr">
+      <h2 id="pwTitle">🔒 Password Required</h2>
+      <button class="close-btn" onclick="closePasswordModal()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="pwInput" placeholder="Enter password" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();submitPassword();}">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;" onclick="submitPassword()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Edit Sheet (Admin only) -->
+<div class="overlay" id="bulkEditOverlay">
+  <div class="sheet">
+    <div class="sheet-hdr">
+      <h2 id="bulkEditTitle">Bulk Edit</h2>
+      <button class="close-btn" onclick="closeBulkEdit()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="hint">Only the fields you fill in below will be applied to every selected case. Leave a field empty/unselected to keep each case's existing value.</div>
+      <div class="field"><label><input type="checkbox" id="be_senior_on"> Senior</label><select id="be_senior" disabled></select></div>
+      <div class="field"><label><input type="checkbox" id="be_consultant_on"> Consultant</label><select id="be_consultant" disabled></select></div>
+      <div class="field"><label><input type="checkbox" id="be_department_on"> Department</label><select id="be_department" disabled></select></div>
+      <div class="field"><label><input type="checkbox" id="be_dayOut_on"> Day out</label><input id="be_dayOut" type="date" disabled></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:16px;" onclick="applyBulkEdit()">💾 Apply to Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Doctor Sheet (Admin only) -->
+<div class="overlay" id="editDoctorOverlay">
+  <div class="sheet pw-sheet">
+    <div class="sheet-hdr">
+      <h2>Edit Doctor Account</h2>
+      <button class="close-btn" onclick="closeEditDoctor()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <input type="hidden" id="ed_id">
+      <div class="field"><label>Full name</label><input id="ed_name" placeholder="Dr. Full Name"></div>
+      <div class="field"><label>Email</label><input id="ed_email" type="email" placeholder="doctor@example.com"></div>
+      <div class="field"><label>Role</label>
+        <select id="ed_role"><option value="doctor">Doctor</option><option value="admin">Admin</option></select>
+      </div>
+      <div class="field"><label>New password (optional)</label><input id="ed_password" type="password" placeholder="Leave blank to keep current password"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:6px;" onclick="saveEditDoctor()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- /#appRoot -->
+
+<script>
+/* ---------- Supabase Auth setup ----------
+   The anon/public key is SAFE to expose in client-side code — it's the
+   equivalent of a public API key and relies on Supabase's own Auth checks,
+   not secrecy. Replace these two values with your own project's, from
+   Supabase Dashboard -> Project Settings -> API. */
+const SUPABASE_URL = 'https://suxjvfyraqpcxplpvqzz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1eGp2ZnlyYXFwY3hwbHB2cXp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MzY2MDQsImV4cCI6MjEwMTAxMjYwNH0.aogUvupm_G14pLWzIO--RhelPeLtwdMVh1UM1DHC-O4';
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const API_CASES = '/api/cases';
+const API_CONFIG = '/api/config';
+const DEFAULT_PASSWORD = '1234';
+let cases = [];
+let config = { seniors: [], consultants: [], departments: [], password: '', showInstallOption: true, isAdmin: false };
+let currentTab = 'active';
+let deferredInstallPrompt = null;
+let currentSession = null;
+let doctorsCache = [];
+let selectedCaseIds = new Set(); // Admin-only bulk selection
+let expandedCaseIds = new Set(); // Which case cards have their details expanded
+let requestRowSeq = 0;
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------- Dark mode toggle ---------- */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if(btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', next);
+  applyTheme(next);
+}
+(function initTheme(){
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+})();
+
+/* ---------- auth ---------- */
+async function getAccessToken(){
+  const { data } = await sbClient.auth.getSession();
+  return data.session ? data.session.access_token : null;
+}
+
+// Wraps fetch() so every call to our own /api/* endpoints carries the
+// doctor's Supabase session token, which the server verifies before
+// touching any data.
+async function authedFetch(url, opts){
+  opts = opts || {};
+  const token = await getAccessToken();
+  const headers = Object.assign({}, opts.headers || {}, token ? { Authorization: 'Bearer ' + token } : {});
+  return fetch(url, Object.assign({}, opts, { headers }));
+}
+
+function showLogin(message){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appRoot').style.display = 'none';
+  const errEl = document.getElementById('loginError');
+  if(message){ errEl.textContent = message; errEl.classList.add('show'); }
+  else { errEl.classList.remove('show'); errEl.textContent = ''; }
+}
+
+function showApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'block';
+}
+
+async function signIn(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if(!email || !password){ showLogin('Please enter your email and password.'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try{
+    const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    currentSession = data.session;
+    document.getElementById('loginPassword').value = '';
+    showApp();
+    await loadCases();
+  }catch(e){
+    console.error('sign-in error:', e);
+    let msg = e.message || 'Sign-in failed.';
+    if(/invalid login/i.test(msg)) msg = 'Incorrect email or password.';
+    showLogin(msg);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+}
+
+async function signOut(){
+  await sbClient.auth.signOut();
+  currentSession = null;
+  showLogin();
+}
+
+function renderUserChip(){
+  const chip = document.getElementById('userChip');
+  const user = currentSession && currentSession.user;
+  if(!user){ chip.innerHTML = ''; return; }
+  const name = (user.user_metadata && user.user_metadata.display_name) || user.email;
+  const initial = esc(name).trim().charAt(0).toUpperCase() || '?';
+  chip.innerHTML = `<span class="user-avatar">${initial}</span> ${esc(name)}<button class="logout-link" onclick="signOut()">Sign out</button>`;
+}
+
+async function initAuth(){
+  const { data } = await sbClient.auth.getSession();
+  currentSession = data.session;
+  sbClient.auth.onAuthStateChange((_event, session)=>{
+    currentSession = session;
+    renderUserChip();
+  });
+  if(currentSession){
+    showApp();
+    await loadCases();
+  }else{
+    showLogin();
+  }
+}
+
+/* ---------- load ---------- */
+async function loadConfig(){
+  try{
+    const r = await authedFetch(API_CONFIG);
+    if(r.status === 401 || r.status === 403){
+      const res = await r.json().catch(()=>({}));
+      await sbClient.auth.signOut();
+      currentSession = null;
+      showLogin(res.error || 'Your session has expired or your account was disabled. Please sign in again.');
+      return;
+    }
+    const data = await r.json();
+    config = Object.assign({ seniors: [], consultants: [], departments: [], password: '', showInstallOption: true, isAdmin: false }, data);
+  }catch(e){
+    config = { seniors: [], consultants: [], departments: [], password: '', showInstallOption: true, isAdmin: false };
+  }
+  renderUserChip();
+  updateInstallButtonVisibility();
+  // Settings, and the multi-select bulk-actions option, are Admin-only —
+  // fully hidden (not just password-gated) for every other doctor.
+  document.getElementById('settingsBtn').style.display = config.isAdmin ? 'flex' : 'none';
+  document.getElementById('selectAllRow').style.display = config.isAdmin ? 'flex' : 'none';
+  if(!config.isAdmin){
+    selectedCaseIds.clear();
+    document.getElementById('bulkBar').classList.remove('active');
+  }
+}
+
+async function loadCases(){
+  await loadConfig();
+  await fetchList();
+}
+
+// Fast list load: the server returns cases WITHOUT attachment file data (only
+// name/type/count), so the list loads quickly even with lots of photos/files.
+async function fetchList(){
+  document.getElementById('listArea').innerHTML = '<div class="loading">Loading...</div>';
+  try{
+    const q = currentTab === 'archived' ? '?archived=1' : '';
+    const r = await authedFetch(API_CASES + q);
+    const data = await r.json();
+    cases = Array.isArray(data) ? data : [];
+  }catch(e){
+    cases = [];
+    showToast('Failed to load data');
+  }
+  renderList();
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  fetchList();
+}
+
+/* ---------- simple table rendering (rows & columns) ---------- */
+// Returns the configured position of a department (lower = earlier), so the
+// list follows the same department order defined in Settings.
+function deptRank(dep){
+  const idx = (config.departments||[]).indexOf(dep||'');
+  return idx === -1 ? 9999 : idx;
+}
+
+// Breaks long diagnosis text into lines of ~wordsPerLine words each, so the
+// column stays narrow instead of stretching the row width.
+function wrapWords(text, wordsPerLine){
+  const n = wordsPerLine || 10;
+  const escaped = esc(text);
+  const words = escaped.split(/\s+/).filter(Boolean);
+  if(!words.length) return '-';
+  const lines = [];
+  for(let i=0;i<words.length;i+=n) lines.push(words.slice(i, i+n).join(' '));
+  return lines.join('<br>');
+}
+
+function formatDateShort(iso){
+  if(!iso) return '';
+  try{ return new Date(iso).toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'}); }
+  catch(e){ return ''; }
+}
+
+// Formats a plain "YYYY-MM-DD" date (from a <input type=date>) together with
+// its weekday name, e.g. "Sun, 2 Aug 2026" — used for the Admission date.
+function formatDateWithDay(dateStr){
+  if(!dateStr) return '';
+  try{
+    const d = new Date(dateStr + 'T00:00:00');
+    if(isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString(undefined, {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+  }catch(e){ return dateStr; }
+}
+
+// Formats a plain "YYYY-MM-DD" admission date into the small stacked
+// "MON / DD" badge shown on the left of each case row.
+function formatDateBadge(dateStr){
+  if(!dateStr) return {mon:'--', day:'--'};
+  try{
+    const d = new Date(dateStr + 'T00:00:00');
+    if(isNaN(d.getTime())) return {mon:'--', day:'--'};
+    return {
+      mon: d.toLocaleDateString(undefined, {month:'short'}),
+      day: d.toLocaleDateString(undefined, {day:'2-digit'})
+    };
+  }catch(e){ return {mon:'--', day:'--'}; }
+}
+
+// Best-effort display name for the currently signed-in doctor, used to stamp
+// "who exactly discharged this case".
+function currentUserName(){
+  const user = currentSession && currentSession.user;
+  if(!user) return 'Unknown';
+  return (user.user_metadata && user.user_metadata.display_name) || user.email || 'Unknown';
+}
+
+function byCell(c){
+  const created = c.createdByName ? `<b>${esc(c.createdByName)}</b>${c.createdAt?(' · '+formatDateShort(c.createdAt)):''}` : '-';
+  let edited = '';
+  if(c.updatedByName && c.updatedByName !== c.createdByName){
+    edited = `<br>✏️ <b>${esc(c.updatedByName)}</b>${c.updatedAt?(' · '+formatDateShort(c.updatedAt)):''}`;
+  }
+  return created + edited;
+}
+
+/* ---------- Vitality: multiple sub-fields grouped into one column ---------- */
+// Normalizes whatever is stored (new object shape, or a legacy plain string
+// from before this feature existed) into a consistent { bp, pr, temp, rr, spo2 } shape.
+const VITAL_KEYS = [
+  { key:'bp',   label:'BP' },
+  { key:'pr',   label:'PR' },
+  { key:'temp', label:'Temp' },
+  { key:'rr',   label:'RR' },
+  { key:'spo2', label:'SpO2' },
+];
+function normalizeVitality(v){
+  if(v && typeof v === 'object') return v;
+  if(typeof v === 'string' && v.trim()) return { bp:'', pr:'', temp:'', rr:'', spo2:'', legacy: v.trim() };
+  return {};
+}
+// Only sub-fields that actually have data are shown, grouped as chips.
+function renderVitalityChips(v){
+  const vit = normalizeVitality(v);
+  const chips = VITAL_KEYS
+    .filter(k=>vit[k.key] && String(vit[k.key]).trim())
+    .map(k=>`<span class="vital-chip">${k.label}: ${esc(vit[k.key])}</span>`);
+  if(vit.legacy) chips.push(`<span class="vital-chip">${esc(vit.legacy)}</span>`);
+  return chips.join('');
+}
+function vitalityIsEmpty(v){
+  const vit = normalizeVitality(v);
+  return !VITAL_KEYS.some(k=>vit[k.key] && String(vit[k.key]).trim()) && !vit.legacy;
+}
+
+/* ---------- Notes / Requests: task-style items with a status ---------- */
+// status is one of: 'Pending', 'Done', 'Not Available'
+function normalizeRequests(list){
+  return Array.isArray(list) ? list.filter(r=>r && r.text && r.text.trim()) : [];
+}
+// Requests that were hidden/archived (already handled) don't show on the
+// main "Open Requests" board anymore, but stay saved with the case.
+function visibleRequests(list){
+  return normalizeRequests(list).filter(r=>!r.hidden);
+}
+function requestStatusClass(status){
+  if(status === 'Done') return 'active-done';
+  if(status === 'Not Available') return 'active-unavailable';
+  return 'active-pending';
+}
+
+/* ---------- simple card grid rendering (rows -> interactive cards) ---------- */
+function renderList(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = cases.filter(c=>{
+    if(q && !(c.ptName||'').toLowerCase().includes(q) && !(c.consultant||'').toLowerCase().includes(q) && !(c.senior||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  // Sort by department first (following the order set in Settings), then by
+  // booking/admission date within each department (earliest first).
+  list.sort((a,b)=>{
+    const da = deptRank(a.department), db = deptRank(b.department);
+    if(da !== db) return da - db;
+    if(da === 9999 && db === 9999){
+      const cmp = (a.department||'').localeCompare(b.department||'');
+      if(cmp !== 0) return cmp;
+    }
+    return (a.admission||'').localeCompare(b.admission||'');
+  });
+
+  renderTasks();
+
+  const area = document.getElementById('listArea');
+  if(list.length===0){
+    area.innerHTML = `<div class="empty"><span class="empty-icon">🩺</span>No cases here yet</div>`;
+    updateBulkBar();
+    return;
+  }
+
+  const cards = list.map(c=>{
+    const isArchived = !!c.dayOut;
+    const isOpen = expandedCaseIds.has(String(c.id));
+    const isChecked = selectedCaseIds.has(String(c.id));
+    const vitalsHtml = renderVitalityChips(c.vitality);
+    const checkboxHtml = config.isAdmin
+      ? `<input type="checkbox" class="case-check case-card-select" onclick="event.stopPropagation();toggleCaseSelection('${c.id}', this.checked)" ${isChecked?'checked':''}>`
+      : '';
+    const deleteBtnHtml = config.isAdmin
+      ? `<button class="icon-btn" onclick="event.stopPropagation();confirmDeleteCase('${c.id}')" title="Delete">🗑️</button>`
+      : '';
+    const exitBtnHtml = !isArchived
+      ? `<button class="icon-btn btn-exit" onclick="event.stopPropagation();dischargeCase('${c.id}')" title="Discharge (خروج)">🚪</button>`
+      : '';
+    const dateBadge = formatDateBadge(c.admission);
+    return `<div class="case-card" onclick="toggleCardDetails('${c.id}')">
+      <div class="case-row">
+        <div class="case-date">
+          <span class="case-date-mon">${esc(dateBadge.mon)}</span>
+          <span class="case-date-day">${esc(dateBadge.day)}</span>
+        </div>
+        <div class="case-main">
+          <div class="case-card-top">
+            ${checkboxHtml}
+            <div class="case-card-name">${esc(c.ptName)} ${isArchived?`<span class="pill pill-archived">Discharged ${esc(c.dayOut)}</span>`:''}</div>
+            <div class="case-card-actions">
+              <button class="icon-btn" onclick="event.stopPropagation();openDetail('${c.id}')" title="Edit">✏️</button>
+              ${exitBtnHtml}
+              ${deleteBtnHtml}
+            </div>
+          </div>
+          <div class="case-card-diag">${c.diagnosis ? wrapWords(c.diagnosis, 14) : '-'}</div>
+          <div class="case-card-tags">
+            <span class="role-chip role-chip-senior">${esc(c.senior)||'-'}</span>
+            <span class="role-chip role-chip-consultant">${esc(c.consultant)||'-'}</span>
+            <span class="role-chip role-chip-department">${esc(c.department)||'-'}</span>
+          </div>
+          <div class="case-card-info">
+            <div class="info-item"><span class="info-ic">🎂</span>Age: <span class="v">${esc(c.age)||'-'}</span></div>
+            <div class="info-item"><span class="info-ic">📅</span>Admitted: <span class="v">${c.admission?formatDateShort(c.admission):'-'}</span></div>
+            <div class="info-item"><span class="info-ic">🚪</span>Day out: <span class="v">${esc(c.dayOut)||'-'}</span></div>
+          </div>
+          ${vitalsHtml ? `<div class="case-card-vitals">${vitalsHtml}</div>` : ''}
+          <div class="case-card-toggle">${isOpen? '▲ Hide full details' : '▼ Show full details'}</div>
+          <div class="case-card-details ${isOpen?'open':''}">
+            <div class="cd-item"><span class="k">Admission</span><span class="v">${c.admission ? formatDateWithDay(c.admission) : '-'}</span></div>
+            <div class="cd-item"><span class="k">Feeding</span><span class="v">${esc(c.feeding)||'-'}</span></div>
+            <div class="cd-item"><span class="k">Drain</span><span class="v">${esc(c.drain)||'-'}</span></div>
+            <div class="cd-item cd-full"><span class="k">Investigation</span><span class="v">${esc(c.investigation)||'-'}</span></div>
+            <div class="cd-item"><span class="k">Labs</span><span class="v">${esc(c.labs)||'-'}</span></div>
+            <div class="cd-item"><span class="k">Rads</span><span class="v">${esc(c.rads)||'-'}</span></div>
+            <div class="cd-item cd-full"><span class="k">Notes</span><span class="v">${esc(c.notes)||'-'}</span></div>
+            <div class="cd-item cd-full"><span class="k">Registered / Edited by</span><span class="v">${byCell(c)}</span></div>
+            <div class="cd-item cd-full"><span class="k">Discharged by</span><span class="v">${c.dischargedByName ? esc(c.dischargedByName)+(c.dischargedAt?(' · '+formatDateShort(c.dischargedAt)):'') : '-'}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="cards-grid">${cards}</div>`;
+  updateBulkBar();
+}
+
+// Expands/collapses a case card's full-detail section in place, without
+// opening the edit form — click on checkboxes/buttons inside the card is
+// stopped from propagating so it doesn't toggle the card by accident.
+function toggleCardDetails(id){
+  const key = String(id);
+  if(expandedCaseIds.has(key)) expandedCaseIds.delete(key);
+  else expandedCaseIds.add(key);
+  renderList();
+}
+
+/* ---------- Notes/Requests task cards, shown above the case list ---------- */
+function renderTasks(){
+  const wrap = document.getElementById('tasksWrap');
+  const area = document.getElementById('tasksArea');
+  const withRequests = cases.filter(c=>visibleRequests(c.requests).length);
+  if(!withRequests.length){ wrap.style.display = 'none'; area.innerHTML = ''; return; }
+  wrap.style.display = 'block';
+  area.innerHTML = withRequests.flatMap(c=>{
+    return visibleRequests(c.requests).map(req=>{
+      const cls = req.status === 'Done' ? 'done' : (req.status === 'Not Available' ? 'unavailable' : '');
+      return `<div class="task-card ${cls}">
+        <div class="task-card-top">
+          <div class="task-card-pt">${esc(c.ptName)}</div>
+          <button class="task-hide-btn" onclick="hideRequest('${c.id}','${req.id}')" title="Already done — hide and move to archive">🗄️</button>
+        </div>
+        <div class="task-card-text">${esc(req.text)}</div>
+        <div class="task-status-row">
+          <button class="task-status-btn ${req.status==='Done'?'active-done':''}" onclick="updateRequestStatus('${c.id}','${req.id}','Done')">Done</button>
+          <button class="task-status-btn ${(!req.status||req.status==='Pending')?'active-pending':''}" onclick="updateRequestStatus('${c.id}','${req.id}','Pending')">Pending</button>
+          <button class="task-status-btn ${req.status==='Not Available'?'active-unavailable':''}" onclick="updateRequestStatus('${c.id}','${req.id}','Not Available')">Not Available</button>
+        </div>
+      </div>`;
+    });
+  }).join('');
+}
+
+async function updateRequestStatus(caseId, reqId, status){
+  const c = cases.find(x=>String(x.id)===String(caseId));
+  if(!c) return;
+  const reqs = normalizeRequests(c.requests).map(r=> r.id===reqId ? {...r, status} : r);
+  const item = { ...c, requests: reqs };
+  try{
+    const r = await authedFetch(`${API_CASES}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(item)});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    c.requests = reqs;
+    renderTasks();
+  }catch(e){
+    console.error('update-request-status error:', e);
+    showToast('Error updating request: ' + e.message);
+  }
+}
+
+// Hides an already-handled request from the main "Open Requests" board and
+// moves it to the archive — it stays saved on the case, just not shown here.
+async function hideRequest(caseId, reqId){
+  const c = cases.find(x=>String(x.id)===String(caseId));
+  if(!c) return;
+  const reqs = normalizeRequests(c.requests).map(r=> r.id===reqId ? {...r, hidden:true} : r);
+  const item = { ...c, requests: reqs };
+  try{
+    const r = await authedFetch(`${API_CASES}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(item)});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    c.requests = reqs;
+    renderTasks();
+    showToast('Moved to archive ✅');
+  }catch(e){
+    console.error('hide-request error:', e);
+    showToast('Error archiving request: ' + e.message);
+  }
+}
+
+/* ---------- Bulk selection (Admin only) ---------- */
+function toggleCaseSelection(id, checked){
+  const key = String(id);
+  if(checked) selectedCaseIds.add(key); else selectedCaseIds.delete(key);
+  updateBulkBar();
+}
+function toggleSelectAll(checked){
+  selectedCaseIds.clear();
+  if(checked) cases.forEach(c=>selectedCaseIds.add(String(c.id)));
+  renderList();
+}
+function clearSelection(){
+  selectedCaseIds.clear();
+  document.getElementById('selectAllCheckbox').checked = false;
+  renderList();
+}
+function updateBulkBar(){
+  const bar = document.getElementById('bulkBar');
+  const n = selectedCaseIds.size;
+  if(config.isAdmin && n > 0){
+    bar.classList.add('active');
+    document.getElementById('bulkCount').textContent = n + ' selected';
+  }else{
+    bar.classList.remove('active');
+  }
+}
+
+function confirmBulkDelete(){
+  const n = selectedCaseIds.size;
+  if(!n) return;
+  if(!confirm(`Are you sure you want to delete ${n} selected case(s)?`)) return;
+  requirePassword(()=>bulkDeleteSelected(), '🔒 Enter password to delete selected cases');
+}
+async function bulkDeleteSelected(){
+  const ids = Array.from(selectedCaseIds);
+  try{
+    const r = await authedFetch(`${API_CASES}/delete`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    showToast(`Deleted ${ids.length} case(s)`);
+    selectedCaseIds.clear();
+    await fetchList();
+  }catch(e){
+    console.error('bulk-delete error:', e);
+    showToast('Error while deleting: ' + e.message);
+  }
+}
+
+function openBulkEdit(){
+  if(!selectedCaseIds.size){ showToast('Select at least one case first'); return; }
+  fillSelect('be_senior', config.seniors||[]);
+  fillSelect('be_consultant', config.consultants||[]);
+  fillSelect('be_department', config.departments||[]);
+  ['senior','consultant','department','dayOut'].forEach(f=>{
+    document.getElementById('be_'+f+'_on').checked = false;
+    document.getElementById('be_'+f).disabled = true;
+  });
+  document.getElementById('be_dayOut').value = '';
+  document.getElementById('bulkEditTitle').textContent = `Bulk Edit (${selectedCaseIds.size} selected)`;
+  document.getElementById('bulkEditOverlay').classList.add('active');
+}
+function closeBulkEdit(){ document.getElementById('bulkEditOverlay').classList.remove('active'); }
+document.addEventListener('change', (e)=>{
+  if(e.target && e.target.id && e.target.id.startsWith('be_') && e.target.id.endsWith('_on')){
+    const field = e.target.id.replace(/^be_/, '').replace(/_on$/, '');
+    document.getElementById('be_'+field).disabled = !e.target.checked;
+  }
+});
+async function applyBulkEdit(){
+  const changes = {};
+  if(document.getElementById('be_senior_on').checked) changes.senior = document.getElementById('be_senior').value;
+  if(document.getElementById('be_consultant_on').checked) changes.consultant = document.getElementById('be_consultant').value;
+  if(document.getElementById('be_department_on').checked) changes.department = document.getElementById('be_department').value;
+  if(document.getElementById('be_dayOut_on').checked) changes.dayOut = document.getElementById('be_dayOut').value;
+  if(!Object.keys(changes).length){ showToast('Choose at least one field to change'); return; }
+  const ids = Array.from(selectedCaseIds);
+  try{
+    for(const id of ids){
+      const c = cases.find(x=>String(x.id)===String(id));
+      if(!c) continue;
+      const item = { ...c, ...changes };
+      const r = await authedFetch(`${API_CASES}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(item)});
+      const res = await r.json();
+      if(res.error) throw new Error(res.error);
+    }
+    showToast(`Updated ${ids.length} case(s) ✅`);
+    closeBulkEdit();
+    selectedCaseIds.clear();
+    await fetchList();
+  }catch(e){
+    console.error('bulk-edit error:', e);
+    showToast('Error while bulk editing: ' + e.message);
+  }
+}
+
+/* ---------- form ---------- */
+function fillSelect(id, options, selected){
+  const el = document.getElementById(id);
+  el.innerHTML = `<option value="">-- Select --</option>` + options.map(o=>
+    `<option value="${esc(o)}" ${o===selected?'selected':''}>${esc(o)}</option>`
+  ).join('');
+}
+
+function openForm(existing){
+  document.getElementById('formTitle').textContent = existing ? 'Edit Case' : 'New Case';
+  const f = existing || {};
+  fillSelect('f_senior', config.seniors||[], f.senior);
+  fillSelect('f_consultant', config.consultants||[], f.consultant);
+  fillSelect('f_department', config.departments||[], f.department);
+  document.getElementById('f_id').value = f.id || '';
+  document.getElementById('f_ptName').value = f.ptName || '';
+  document.getElementById('f_age').value = f.age || '';
+  document.getElementById('f_admission').value = f.admission || '';
+  document.getElementById('f_dayOut').value = f.dayOut || '';
+  document.getElementById('f_diagnosis').value = f.diagnosis || '';
+  const vit = normalizeVitality(f.vitality);
+  document.getElementById('f_vital_bp').value = vit.bp || vit.legacy || '';
+  document.getElementById('f_vital_pr').value = vit.pr || '';
+  document.getElementById('f_vital_temp').value = vit.temp || '';
+  document.getElementById('f_vital_rr').value = vit.rr || '';
+  document.getElementById('f_vital_spo2').value = vit.spo2 || '';
+  document.getElementById('f_feeding').value = f.feeding || '';
+  document.getElementById('f_drain').value = f.drain || '';
+  document.getElementById('f_investigation').value = f.investigation || '';
+  document.getElementById('f_labs').value = f.labs || '';
+  document.getElementById('f_rads').value = f.rads || '';
+  document.getElementById('f_notes').value = f.notes || '';
+  renderRequestRows(normalizeRequests(f.requests));
+  const trailBox = document.getElementById('f_trailBox');
+  if(f.createdByName){
+    let html = `🖊️ Registered by <b>${esc(f.createdByName)}</b>${f.createdAt?(' on '+formatDateShort(f.createdAt)):''}`;
+    if(f.updatedByName && f.updatedByName !== f.createdByName){
+      html += `<br>✏️ Last edited by <b>${esc(f.updatedByName)}</b>${f.updatedAt?(' on '+formatDateShort(f.updatedAt)):''}`;
+    }
+    trailBox.innerHTML = html;
+    trailBox.style.display = 'block';
+  }else{
+    trailBox.style.display = 'none';
+  }
+  document.getElementById('formOverlay').classList.add('active');
+}
+function closeForm(){ document.getElementById('formOverlay').classList.remove('active'); }
+
+/* ---------- Notes/Requests rows inside the Add/Edit form ---------- */
+function renderRequestRows(list){
+  const wrap = document.getElementById('requestsList');
+  wrap.innerHTML = (list||[]).map(r=>{
+    const rid = r.id || ('req'+(++requestRowSeq));
+    const status = r.status || 'Pending';
+    const hiddenBadge = r.hidden ? ` <span style="color:var(--t2);font-size:.7rem;">(archived)</span>` : '';
+    return `<div class="request-row" data-rid="${esc(rid)}" data-hidden="${r.hidden?'1':''}">
+      <input type="text" value="${esc(r.text||'')}" placeholder="e.g. Repeat CBC this afternoon">
+      <select>
+        <option value="Pending" ${status==='Pending'?'selected':''}>Pending</option>
+        <option value="Done" ${status==='Done'?'selected':''}>Done</option>
+        <option value="Not Available" ${status==='Not Available'?'selected':''}>Not Available</option>
+      </select>${hiddenBadge}
+      <button type="button" class="rm" onclick="this.closest('.request-row').remove()">✕</button>
+    </div>`;
+  }).join('');
+}
+function addRequestRow(){
+  const wrap = document.getElementById('requestsList');
+  const rid = 'req'+(++requestRowSeq);
+  const row = document.createElement('div');
+  row.className = 'request-row';
+  row.dataset.rid = rid;
+  row.innerHTML = `
+      <input type="text" placeholder="e.g. Repeat CBC this afternoon">
+      <select>
+        <option value="Pending" selected>Pending</option>
+        <option value="Done">Done</option>
+        <option value="Not Available">Not Available</option>
+      </select>
+      <button type="button" class="rm" onclick="this.closest('.request-row').remove()">✕</button>`;
+  wrap.appendChild(row);
+}
+function collectRequestsFromForm(){
+  return Array.from(document.querySelectorAll('#requestsList .request-row')).map(row=>{
+    const text = row.querySelector('input[type=text]').value.trim();
+    const status = row.querySelector('select').value;
+    const hidden = row.dataset.hidden === '1';
+    return text ? { id: row.dataset.rid, text, status, ...(hidden?{hidden:true}:{}) } : null;
+  }).filter(Boolean);
+}
+
+async function saveCase(){
+  const ptName = document.getElementById('f_ptName').value.trim();
+  if(!ptName){ showToast('Please enter the patient name'); return; }
+  const id = document.getElementById('f_id').value || (Date.now().toString());
+  const vitality = {
+    bp: document.getElementById('f_vital_bp').value.trim(),
+    pr: document.getElementById('f_vital_pr').value.trim(),
+    temp: document.getElementById('f_vital_temp').value.trim(),
+    rr: document.getElementById('f_vital_rr').value.trim(),
+    spo2: document.getElementById('f_vital_spo2').value.trim(),
+  };
+  const item = {
+    id,
+    ptName,
+    senior: document.getElementById('f_senior').value,
+    consultant: document.getElementById('f_consultant').value,
+    department: document.getElementById('f_department').value,
+    age: document.getElementById('f_age').value.trim(),
+    admission: document.getElementById('f_admission').value,
+    dayOut: document.getElementById('f_dayOut').value,
+    diagnosis: document.getElementById('f_diagnosis').value.trim(),
+    vitality,
+    feeding: document.getElementById('f_feeding').value.trim(),
+    drain: document.getElementById('f_drain').value.trim(),
+    investigation: document.getElementById('f_investigation').value.trim(),
+    labs: document.getElementById('f_labs').value.trim(),
+    rads: document.getElementById('f_rads').value.trim(),
+    notes: document.getElementById('f_notes').value.trim(),
+    requests: collectRequestsFromForm(),
+  };
+  try{
+    const r = await authedFetch(`${API_CASES}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(item)});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    closeForm();
+    showToast('Saved successfully ✅');
+    await fetchList();
+  }catch(e){
+    console.error('save error:', e);
+    showToast('Error while saving: ' + e.message);
+  }
+}
+
+async function openDetail(id){
+  const c = cases.find(x=>String(x.id)===String(id));
+  if(!c) return;
+  openForm(c);
+}
+
+// "خروج" — one-click discharge: stamps today's date as Day out, plus exactly
+// who discharged the case and when, without opening the full edit form.
+async function dischargeCase(id){
+  const c = cases.find(x=>String(x.id)===String(id));
+  if(!c) return;
+  if(c.dayOut){ showToast('This case is already discharged'); return; }
+  if(!confirm(`Discharge "${c.ptName}" today?`)) return;
+  const today = new Date().toISOString().slice(0,10);
+  const nowIso = new Date().toISOString();
+  const item = { ...c, dayOut: today, dischargedByName: currentUserName(), dischargedAt: nowIso };
+  try{
+    const r = await authedFetch(`${API_CASES}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(item)});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    showToast('Case discharged ✅');
+    await fetchList();
+  }catch(e){
+    console.error('discharge error:', e);
+    showToast('Error while discharging: ' + e.message);
+  }
+}
+
+async function deleteCase(id){
+  try{
+    const r = await authedFetch(`${API_CASES}/delete`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    showToast('Deleted');
+    await fetchList();
+  }catch(e){
+    console.error('delete error:', e);
+    showToast('Error while deleting: ' + e.message);
+  }
+}
+function confirmDeleteCase(id){
+  if(!confirm('Are you sure you want to delete this case?')) return;
+  requirePassword(()=>deleteCase(id), '🔒 Enter password to delete this case');
+}
+
+/* ---------- password modal ---------- */
+let pwCallback = null;
+function requirePassword(cb, title){
+  pwCallback = cb;
+  document.getElementById('pwTitle').textContent = title || '🔒 Password Required';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwOverlay').classList.add('active');
+  setTimeout(()=>{ const el = document.getElementById('pwInput'); if(el) el.focus(); }, 50);
+}
+function closePasswordModal(){
+  document.getElementById('pwOverlay').classList.remove('active');
+  pwCallback = null;
+}
+function submitPassword(){
+  const val = document.getElementById('pwInput').value;
+  const correct = config.password || DEFAULT_PASSWORD;
+  if(val === correct){
+    const cb = pwCallback;
+    document.getElementById('pwOverlay').classList.remove('active');
+    pwCallback = null;
+    if(cb) cb();
+  }else{
+    showToast('❌ Incorrect password');
+  }
+}
+
+/* ---------- Settings ---------- */
+function openSettings(){
+  requirePassword(()=>{
+    renderSettingsList('seniors');
+    renderSettingsList('consultants');
+    renderSettingsList('departments');
+    document.getElementById('newPasswordInput').value = '';
+    document.getElementById('showInstallToggle').checked = config.showInstallOption !== false;
+    document.getElementById('doctorsSection').style.display = config.isAdmin ? 'block' : 'none';
+    if(config.isAdmin) loadDoctors();
+    document.getElementById('settingsOverlay').classList.add('active');
+  }, '🔒 Enter password to access Settings');
+}
+function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('active'); }
+
+function renderSettingsList(key){
+  const wrap = document.getElementById(key+'List');
+  const list = config[key] || [];
+  wrap.innerHTML = list.map((v,i)=>`
+    <div class="settings-row">
+      <input value="${esc(v)}" data-key="${key}" data-idx="${i}">
+      <button class="rm" onclick="removeSettingsRow('${key}', ${i})">✕</button>
+    </div>`).join('');
+}
+
+function addSettingsRow(key){
+  config[key] = config[key] || [];
+  config[key].push('');
+  renderSettingsList(key);
+}
+function removeSettingsRow(key, idx){
+  config[key].splice(idx,1);
+  renderSettingsList(key);
+}
+
+async function saveSettings(){
+  // collect current input values back into config
+  ['seniors','consultants','departments'].forEach(key=>{
+    const inputs = document.querySelectorAll(`#${key}List input`);
+    config[key] = Array.from(inputs).map(i=>i.value.trim()).filter(v=>v);
+  });
+  const newPass = document.getElementById('newPasswordInput').value.trim();
+  const showInstall = document.getElementById('showInstallToggle').checked;
+  try{
+    for(const key of ['seniors','consultants','departments']){
+      const r = await authedFetch(`${API_CONFIG}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key, value: config[key]})});
+      const res = await r.json();
+      if(res.error) throw new Error(res.error);
+    }
+    {
+      const r = await authedFetch(`${API_CONFIG}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key:'showInstallOption', value: showInstall})});
+      const res = await r.json();
+      if(res.error) throw new Error(res.error);
+      config.showInstallOption = showInstall;
+      updateInstallButtonVisibility();
+    }
+    if(newPass){
+      const r = await authedFetch(`${API_CONFIG}/save`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key:'password', value: newPass})});
+      const res = await r.json();
+      if(res.error) throw new Error(res.error);
+      config.password = newPass;
+    }
+    showToast('Settings saved ✅');
+    closeSettings();
+    renderList();
+  }catch(e){
+    console.error('save settings error:', e);
+    showToast('Error saving settings: ' + e.message);
+  }
+}
+
+/* ---------- installable app ---------- */
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function updateInstallButtonVisibility(){
+  const btn = document.getElementById('installBtn');
+  if(!btn) return;
+  const allowed = config.showInstallOption !== false;
+  const show = !!deferredInstallPrompt && !isStandaloneApp() && allowed;
+  btn.style.display = show ? 'flex' : 'none';
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  updateInstallButtonVisibility();
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
+  updateInstallButtonVisibility();
+  showToast('App installed ✅');
+});
+async function promptInstall(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  updateInstallButtonVisibility();
+}
+
+/* ---------- export to Excel ---------- */
+async function exportToExcel(){
+  try{
+    showToast('Preparing export...');
+    const [activeData, archivedData] = await Promise.all([
+      authedFetch(API_CASES).then(r=>r.json()).catch(()=>[]),
+      authedFetch(API_CASES + '?archived=1').then(r=>r.json()).catch(()=>[]),
+    ]);
+    const all = [...(Array.isArray(activeData)?activeData:[]), ...(Array.isArray(archivedData)?archivedData:[])];
+    if(!all.length){ showToast('No cases to export'); return; }
+    const rows = all.map(c=>({
+      'Patient Name': c.ptName || '',
+      'Senior': c.senior || '',
+      'Consultant': c.consultant || '',
+      'Department': c.department || '',
+      'Age': c.age || '',
+      'Diagnosis': c.diagnosis || '',
+      'Admission Date': c.admission || '',
+      'Vitality': (()=>{ const v = normalizeVitality(c.vitality); return VITAL_KEYS.filter(k=>v[k.key]).map(k=>`${k.label}: ${v[k.key]}`).join(' | ') || v.legacy || ''; })(),
+      'Feeding': c.feeding || '',
+      'Drain': c.drain || '',
+      'Investigation': c.investigation || '',
+      'Day Out': c.dayOut || '',
+      'Labs': c.labs || '',
+      'Rads': c.rads || '',
+      'Notes': c.notes || '',
+      'Notes/Requests': normalizeRequests(c.requests).map(r=>`${r.text} [${r.status||'Pending'}]`).join(' | '),
+      'Registered By': c.createdByName || '',
+      'Registered On': c.createdAt ? formatDateShort(c.createdAt) : '',
+      'Last Edited By': c.updatedByName || '',
+      'Last Edited On': c.updatedAt ? formatDateShort(c.updatedAt) : '',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Cases');
+    const dateStr = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `surgery-cases-${dateStr}.xlsx`);
+    showToast('Exported ✅');
+  }catch(e){
+    console.error('export error:', e);
+    showToast('Error exporting: ' + e.message);
+  }
+}
+
+/* ---------- Doctors management (admin only) ---------- */
+async function loadDoctors(){
+  document.getElementById('doctorsList').innerHTML = '<div class="loading">Loading...</div>';
+  try{
+    const r = await authedFetch('/api/doctors');
+    const data = await r.json();
+    if(data.error) throw new Error(data.error);
+    doctorsCache = Array.isArray(data) ? data : [];
+  }catch(e){
+    doctorsCache = [];
+    console.error('load-doctors error:', e);
+  }
+  renderDoctors();
+}
+
+function renderDoctors(){
+  const wrap = document.getElementById('doctorsList');
+  if(!doctorsCache.length){ wrap.innerHTML = '<div class="hint">No doctor accounts yet.</div>'; return; }
+  wrap.innerHTML = doctorsCache.map((d,i)=>`
+    <div class="doctor-row">
+      <div class="doctor-info">
+        <div class="doctor-name">${esc(d.display_name)}
+          <span class="doctor-badge ${d.is_active?'':'disabled'}">${d.is_active ? (d.role==='admin'?'Admin':'Active') : 'Disabled'}</span>
+        </div>
+        <div class="doctor-email">${esc(d.email)}</div>
+      </div>
+      <div class="doctor-actions">
+        <button class="doctor-mini-btn" onclick="moveDoctor('${d.id}', -1)" title="Move up" ${i===0?'disabled':''}>▲</button>
+        <button class="doctor-mini-btn" onclick="moveDoctor('${d.id}', 1)" title="Move down" ${i===doctorsCache.length-1?'disabled':''}>▼</button>
+        <button class="doctor-mini-btn" onclick="openEditDoctor('${d.id}')" title="Edit">✏️</button>
+        <button class="doctor-toggle ${d.is_active?'disable':'enable'}" onclick="toggleDoctor('${d.id}', ${!d.is_active})">
+          ${d.is_active ? '🚫 Disable' : '✅ Enable'}
+        </button>
+        <button class="doctor-mini-btn danger" onclick="deleteDoctor('${d.id}')" title="Delete">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// Swaps a doctor's position with its neighbor (up/down), then persists the
+// full new order. Admin-only — this whole section is hidden otherwise.
+async function moveDoctor(id, dir){
+  const idx = doctorsCache.findIndex(d=>String(d.id)===String(id));
+  const swapWith = idx + dir;
+  if(idx===-1 || swapWith<0 || swapWith>=doctorsCache.length) return;
+  const arr = doctorsCache.slice();
+  [arr[idx], arr[swapWith]] = [arr[swapWith], arr[idx]];
+  doctorsCache = arr;
+  renderDoctors();
+  try{
+    const order = doctorsCache.map(d=>d.id);
+    const r = await authedFetch('/api/doctors/reorder', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({order})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+  }catch(e){
+    console.error('reorder-doctors error:', e);
+    showToast('Error saving order: ' + e.message);
+    await loadDoctors();
+  }
+}
+
+function openEditDoctor(id){
+  const d = doctorsCache.find(x=>String(x.id)===String(id));
+  if(!d) return;
+  document.getElementById('ed_id').value = d.id;
+  document.getElementById('ed_name').value = d.display_name || '';
+  document.getElementById('ed_email').value = d.email || '';
+  document.getElementById('ed_role').value = d.role || 'doctor';
+  document.getElementById('ed_password').value = '';
+  document.getElementById('editDoctorOverlay').classList.add('active');
+}
+function closeEditDoctor(){ document.getElementById('editDoctorOverlay').classList.remove('active'); }
+
+async function saveEditDoctor(){
+  const id = document.getElementById('ed_id').value;
+  const displayName = document.getElementById('ed_name').value.trim();
+  const email = document.getElementById('ed_email').value.trim();
+  const role = document.getElementById('ed_role').value;
+  const password = document.getElementById('ed_password').value;
+  if(!displayName || !email){ showToast('Please fill name and email'); return; }
+  try{
+    const r = await authedFetch('/api/doctors/update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, displayName, email, role, password})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    showToast('Doctor account updated ✅');
+    closeEditDoctor();
+    await loadDoctors();
+  }catch(e){
+    console.error('update-doctor error:', e);
+    showToast('Error updating account: ' + e.message);
+  }
+}
+
+async function deleteDoctor(id){
+  const d = doctorsCache.find(x=>String(x.id)===String(id));
+  if(!d) return;
+  if(!confirm(`Delete the account for "${d.display_name}"? Their past cases stay unchanged, but they will no longer be able to sign in.`)) return;
+  try{
+    const r = await authedFetch('/api/doctors/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    showToast('Doctor account deleted ✅');
+    await loadDoctors();
+  }catch(e){
+    console.error('delete-doctor error:', e);
+    showToast('Error deleting account: ' + e.message);
+  }
+}
+
+async function createDoctor(){
+  const displayName = document.getElementById('newDoctorName').value.trim();
+  const email = document.getElementById('newDoctorEmail').value.trim();
+  const password = document.getElementById('newDoctorPassword').value;
+  const role = document.getElementById('newDoctorRole').value;
+  if(!displayName || !email || !password){ showToast('Please fill name, email and password'); return; }
+  try{
+    const r = await authedFetch('/api/doctors/create', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password, displayName, role})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    document.getElementById('newDoctorName').value = '';
+    document.getElementById('newDoctorEmail').value = '';
+    document.getElementById('newDoctorPassword').value = '';
+    showToast('Doctor account created ✅');
+    await loadDoctors();
+  }catch(e){
+    console.error('create-doctor error:', e);
+    showToast('Error creating account: ' + e.message);
+  }
+}
+
+async function toggleDoctor(id, makeActive){
+  try{
+    const r = await authedFetch('/api/doctors/toggle', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, isActive: makeActive})});
+    const res = await r.json();
+    if(res.error) throw new Error(res.error);
+    showToast(makeActive ? 'Account enabled ✅' : 'Account disabled — their past cases are unchanged.');
+    await loadDoctors();
+  }catch(e){
+    console.error('toggle-doctor error:', e);
+    showToast('Error: ' + e.message);
+  }
+}
+
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+initAuth();
+</script>
+</body>
+</html>
