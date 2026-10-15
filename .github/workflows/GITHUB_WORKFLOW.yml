@@ -1,3 +1,4 @@
+
 name: Build Flousy Android APK
 
 on:
@@ -7,14 +8,14 @@ on:
       - main
 
 permissions:
-  contents: write # لنشر الـ APK في Release ثابت باسم "latest"
+  contents: write
 
 concurrency:
   group: android-release-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  VERSION_CODE_BASE: 1000 # versionCode = 1000 + رقم التشغيل
+  VERSION_CODE_BASE: 1000
 
 jobs:
   build:
@@ -25,17 +26,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # لو الريبو فيه ملف zip بس (رفع من الموبايل) نفكّه هنا قبل البناء
-      - name: Unpack project zip (only if repo has just the zip)
+      # Unpack ZIP if the repository contains only the project archive
+      - name: Unpack project ZIP
         run: |
+          set -e
+
           if [ ! -f pubspec.yaml ]; then
-            z=$(ls *.zip 2>/dev/null | head -1)
-            [ -n "$z" ] || { echo "::error::مفيش pubspec.yaml ولا ملف zip في الريبو"; exit 1; }
-            mkdir _unz && unzip -q "$z" -d _unz
-            root=$(find _unz -maxdepth 2 -name pubspec.yaml -printf '%h\n' | head -1)
-            [ -n "$root" ] || { echo "::error::الـ zip مفيهوش pubspec.yaml"; exit 1; }
+            z=$(find . -maxdepth 1 -type f -name '*.zip' | head -1)
+
+            if [ -z "$z" ]; then
+              echo "::error::No pubspec.yaml or project ZIP found"
+              exit 1
+            fi
+
+            mkdir -p _unz
+            unzip -q "$z" -d _unz
+
+            root=$(find _unz -maxdepth 4 -type f -name pubspec.yaml \
+              -not -path '*/.dart_tool/*' | head -1 | xargs -r dirname)
+
+            if [ -z "$root" ]; then
+              echo "::error::pubspec.yaml not found inside ZIP"
+              exit 1
+            fi
+
             cp -a "$root"/. .
           fi
+
+          test -f pubspec.yaml
+          test -f tool/setup_android.sh
 
       - name: Setup Java 17
         uses: actions/setup-java@v5
@@ -49,24 +68,37 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Flutter / Dart / Java versions
+      - name: Show tool versions
         run: |
           flutter --version
+          dart --version
           java -version
 
-      - name: Prepare Android project (generate + manifest + JVM 17 init script)
+      - name: Prepare Android project
         run: bash tool/setup_android.sh
 
+      # Values are stored under Settings > Secrets and variables > Actions > Variables
       - name: Check Supabase settings
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
+          set -e
+
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::لازم تضيف الأسرار SUPABASE_URL و SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions)"
+            echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY in Repository Variables"
             exit 1
           fi
-          echo "::add-mask::$SUPABASE_ANON_KEY"
+
+          case "$SUPABASE_URL" in
+            https://*) ;;
+            *)
+              echo "::error::SUPABASE_URL must start with https://"
+              exit 1
+              ;;
+          esac
+
+          echo "Supabase configuration found"
 
       - name: Install dependencies
         run: flutter pub get
@@ -74,22 +106,22 @@ jobs:
       - name: Generate app icons
         run: dart run flutter_launcher_icons
 
-      - name: Format Dart code
-        run: dart format lib test
+      - name: Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze Flutter project
-        continue-on-error: true
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests
-        continue-on-error: true
         run: flutter test
 
       - name: Build release APK
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
+          set -e
+
           flutter build apk --release --no-shrink \
             --build-number=$(( VERSION_CODE_BASE + GITHUB_RUN_NUMBER )) \
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
@@ -102,27 +134,43 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          set -e
+          set -euo pipefail
+
           mkdir -p dist
+
           BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
-          SRC=build/app/outputs/flutter-apk/app-release.apk
-          if [ -n "$KEYSTORE_BASE64" ]; then
+          SRC="build/app/outputs/flutter-apk/app-release.apk"
+
+          test -f "$SRC"
+
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > release.jks
-            KS_PASS="$KEYSTORE_PASSWORD"; ALIAS="$KEY_ALIAS"; K_PASS="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
-            echo "التوقيع بمفتاح المستودع"
+
+            KS_PASS="${KEYSTORE_PASSWORD:?Missing KEYSTORE_PASSWORD}"
+            ALIAS="${KEY_ALIAS:?Missing KEY_ALIAS}"
+            K_PASS="${KEY_PASSWORD:-$KS_PASS}"
+
+            echo "Signing with repository keystore"
           else
-            echo "::warning::لا يوجد Keystore في الأسرار — توقيع بمفتاح مؤقت (مش هيتحدّث فوق نسخة موقّعة بمفتاح تاني)"
-            keytool -genkeypair -keystore release.jks -alias flousy -keyalg RSA -keysize 2048 \
-              -validity 10000 -storepass android -keypass android -dname "CN=Flousy,O=Flousy,C=EG"
-            KS_PASS=android; ALIAS=flousy; K_PASS=android
+            echo "::error::Missing signing keystore. Configure KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD in GitHub Actions Secrets."
+            exit 1
           fi
-          "$BT/zipalign" -f -p 4 "$SRC" aligned.apk
-          "$BT/apksigner" sign --ks release.jks --ks-key-alias "$ALIAS" \
-            --ks-pass "pass:$KS_PASS" --key-pass "pass:$K_PASS" \
-            --out dist/flousy-release.apk aligned.apk
+
+          "$BT/zipalign" -f -p 4 "$SRC" dist/aligned.apk
+
+          "$BT/apksigner" sign \
+            --ks release.jks \
+            --ks-key-alias "$ALIAS" \
+            --ks-pass "pass:$KS_PASS" \
+            --key-pass "pass:$K_PASS" \
+            --out dist/flousy-release.apk \
+            dist/aligned.apk
+
           "$BT/apksigner" verify dist/flousy-release.apk
-          rm -f release.jks aligned.apk
-          ls -la dist
+
+          rm -f release.jks dist/aligned.apk
+
+          ls -lh dist/flousy-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -132,11 +180,21 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish to "latest" release
+      - name: Publish to latest release
         if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest >/dev/null 2>&1 || gh release create latest --title "Flousy (latest build)" --notes "أحدث بناء تلقائي من فرع main" --prerelease
+          set -e
+
+          if ! gh release view latest >/dev/null 2>&1; then
+            gh release create latest \
+              --title "Flousy (latest build)" \
+              --notes "Latest automated build from main" \
+              --prerelease
+          fi
+
           gh release upload latest dist/flousy-release.apk --clobber
-          echo "https://github.com/${{ github.repository }}/releases/download/latest/flousy-release.apk" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "APK URL: https://github.com/${GITHUB_REPOSITORY}/releases/download/latest/flousy-release.apk" \
+            >> "$GITHUB_STEP_SUMMARY"
