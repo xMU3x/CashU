@@ -5,6 +5,12 @@ cd "$(dirname "$0")/.."
 if [ ! -d android ]; then
   flutter create --platforms=android --org com.werd --project-name tayyar --no-pub .
 fi
+# Flutter may generate its stock widget_test.dart, which refers to MyApp.
+# This project uses TayyarApp and already has its own calc tests.
+if [ -f test/widget_test.dart ] && grep -q "MyApp" test/widget_test.dart; then
+  rm -f test/widget_test.dart
+  echo "Removed generated Flutter template test referencing MyApp"
+fi
 cp android_overlay/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
 python3 tool/patch_gradle.py
 GH="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"

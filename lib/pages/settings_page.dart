@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/anim.dart';
 import '../core/currency.dart';
 import '../core/repo.dart';
 import '../core/settings.dart';

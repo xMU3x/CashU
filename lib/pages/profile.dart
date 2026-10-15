@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/anim.dart';
 import '../core/repo.dart';
 import '../core/sync.dart';
 import '../core/util.dart';
