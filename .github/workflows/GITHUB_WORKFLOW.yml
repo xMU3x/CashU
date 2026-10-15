@@ -20,13 +20,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # Unpack ZIP if the repository contains only the project archive
       - name: Unpack project ZIP
         run: |
           set -e
@@ -42,11 +41,13 @@ jobs:
             mkdir -p _unz
             unzip -q "$z" -d _unz
 
-            root=$(find _unz -maxdepth 5 -type f -name pubspec.yaml \
-              -not -path '*/.dart_tool/*' | head -1 | xargs -r dirname)
+            root=$(find _unz -maxdepth 5 -type f \
+              -name pubspec.yaml \
+              -not -path '*/.dart_tool/*' |
+              head -1 | xargs -r dirname)
 
             if [ -z "$root" ]; then
-              echo "::error::pubspec.yaml not found inside ZIP"
+              echo "::error::pubspec.yaml not found in ZIP"
               exit 1
             fi
 
@@ -85,19 +86,19 @@ jobs:
           set -e
 
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY in Repository Variables"
+            echo "::error::Missing Supabase Repository Variables"
             exit 1
           fi
 
           case "$SUPABASE_URL" in
             https://*) ;;
             *)
-              echo "::error::SUPABASE_URL must start with https://"
+              echo "::error::Invalid SUPABASE_URL"
               exit 1
               ;;
           esac
 
-          echo "Supabase configuration found"
+          echo "Supabase settings found"
 
       - name: Install dependencies
         run: flutter pub get
@@ -105,7 +106,6 @@ jobs:
       - name: Generate app icons
         run: dart run flutter_launcher_icons
 
-      # Format files before checking them
       - name: Format Dart code
         run: dart format lib test
 
@@ -118,12 +118,130 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      # First run creates the key and stores it using GitHub's
+      # encrypted repository-secrets API. Later runs reuse it.
+      - name: Prepare persistent signing key
+        env:
+          EXISTING_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
+          EXISTING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          EXISTING_ALIAS: ${{ secrets.KEY_ALIAS }}
+          EXISTING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          BOOTSTRAP_TOKEN: ${{ secrets.SECRETS_BOOTSTRAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          set +x
+
+          if [ -n "${EXISTING_KEYSTORE:-}" ]; then
+            KS_PASS="${EXISTING_STORE_PASSWORD:?Missing KEYSTORE_PASSWORD}"
+            ALIAS="${EXISTING_ALIAS:?Missing KEY_ALIAS}"
+            K_PASS="${EXISTING_KEY_PASSWORD:-$KS_PASS}"
+
+            echo "$EXISTING_KEYSTORE" | base64 -d > release.jks
+
+            echo "Using existing persistent signing key"
+
+          else
+            if [ -z "${BOOTSTRAP_TOKEN:-}" ]; then
+              echo "::error::Add SECRETS_BOOTSTRAP_TOKEN to GitHub Actions Secrets before the first run."
+              exit 1
+            fi
+
+            echo "Generating first signing key"
+
+            KS_PASS="$(openssl rand -hex 32)"
+            K_PASS="$KS_PASS"
+            ALIAS="flousy"
+
+            keytool -genkeypair \
+              -keystore release.jks \
+              -alias "$ALIAS" \
+              -keyalg RSA \
+              -keysize 3072 \
+              -validity 10000 \
+              -storepass "$KS_PASS" \
+              -keypass "$K_PASS" \
+              -dname "CN=Flousy,O=Flousy,C=EG"
+
+            KEYSTORE_B64="$(base64 -w 0 release.jks)"
+
+            echo "::add-mask::$KS_PASS"
+            echo "::add-mask::$KEYSTORE_B64"
+
+            python -m pip install --quiet pynacl
+
+            export KS_PASS K_PASS ALIAS KEYSTORE_B64
+
+            python <<'PY'
+          import os
+          import json
+          import base64
+          import urllib.request
+          from nacl.public import PublicKey, SealedBox
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          token = os.environ["BOOTSTRAP_TOKEN"]
+          api = f"https://api.github.com/repos/{repo}/actions/secrets"
+
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+              "Content-Type": "application/json",
+          }
+
+          def request(url, method="GET", body=None):
+              data = None if body is None else json.dumps(body).encode()
+              req = urllib.request.Request(
+                  url, data=data, headers=headers, method=method
+              )
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.loads(response.read()) if response.length != 0 else {}
+
+          public = request(api + "/public-key")
+          public_key = PublicKey(base64.b64decode(public["key"]))
+          box = SealedBox(public_key)
+
+          values = {
+              "KEYSTORE_BASE64": os.environ["KEYSTORE_B64"],
+              "KEYSTORE_PASSWORD": os.environ["KS_PASS"],
+              "KEY_ALIAS": os.environ["ALIAS"],
+              "KEY_PASSWORD": os.environ["K_PASS"],
+          }
+
+          for name, value in values.items():
+              encrypted = base64.b64encode(
+                  box.encrypt(value.encode())
+              ).decode()
+
+              request(
+                  f"{api}/{name}",
+                  method="PUT",
+                  body={
+                      "encrypted_value": encrypted,
+                      "key_id": public["key_id"],
+                  },
+              )
+
+          print("Signing secrets saved successfully.")
+          PY
+
+          fi
+
+          {
+            echo "KEYSTORE_PASSWORD=$KS_PASS"
+            echo "KEY_ALIAS=$ALIAS"
+            echo "KEY_PASSWORD=$K_PASS"
+          } >> "$GITHUB_ENV"
+
+          echo "::add-mask::$KS_PASS"
+          echo "::add-mask::$K_PASS"
+
       - name: Build release APK
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
-          set -e
+          set -euo pipefail
 
           flutter build apk --release --no-shrink \
             --build-number=$(( VERSION_CODE_BASE + GITHUB_RUN_NUMBER )) \
@@ -131,11 +249,6 @@ jobs:
             --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Sign release APK
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
 
@@ -145,31 +258,21 @@ jobs:
           SRC="build/app/outputs/flutter-apk/app-release.apk"
 
           test -f "$SRC"
-
-          if [ -z "${KEYSTORE_BASE64:-}" ]; then
-            echo "::error::Missing KEYSTORE_BASE64. Configure the APK signing secrets."
-            exit 1
-          fi
-
-          echo "$KEYSTORE_BASE64" | base64 -d > release.jks
-
-          KS_PASS="${KEYSTORE_PASSWORD:?Missing KEYSTORE_PASSWORD}"
-          ALIAS="${KEY_ALIAS:?Missing KEY_ALIAS}"
-          K_PASS="${KEY_PASSWORD:-$KS_PASS}"
+          test -f release.jks
 
           "$BT/zipalign" -f -p 4 "$SRC" dist/aligned.apk
 
           "$BT/apksigner" sign \
             --ks release.jks \
-            --ks-key-alias "$ALIAS" \
-            --ks-pass "pass:$KS_PASS" \
-            --key-pass "pass:$K_PASS" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass "env:KEYSTORE_PASSWORD" \
+            --key-pass "env:KEY_PASSWORD" \
             --out dist/flousy-release.apk \
             dist/aligned.apk
 
-          "$BT/apksigner" verify dist/flousy-release.apk
+          "$BT/apksigner" verify --verbose dist/flousy-release.apk
 
-          rm -f release.jks dist/aligned.apk
+          rm -f dist/aligned.apk release.jks
 
           ls -lh dist/flousy-release.apk
 
@@ -181,12 +284,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish to latest release
+      - name: Publish latest release
         if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -e
+          set -euo pipefail
 
           if ! gh release view latest >/dev/null 2>&1; then
             gh release create latest \
@@ -197,5 +300,5 @@ jobs:
 
           gh release upload latest dist/flousy-release.apk --clobber
 
-          echo "APK URL: https://github.com/${GITHUB_REPOSITORY}/releases/download/latest/flousy-release.apk" \
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/download/latest/flousy-release.apk" \
             >> "$GITHUB_STEP_SUMMARY"
