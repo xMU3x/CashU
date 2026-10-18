@@ -89,6 +89,14 @@ class Repo extends ChangeNotifier {
   // ---------- الحسابات والميزانيات ----------
   List<Account> get accList => (_acc.values.where((a) => !a.del && !a.arch).toList()
     ..sort((a, b) => a.id == 'acc_main' ? -1 : b.id == 'acc_main' ? 1 : a.id.compareTo(b.id)));
+  List<Account> get archivedList => (_acc.values.where((a) => !a.del && a.arch).toList()..sort((a, b) => a.name.compareTo(b.name)));
+  /// استرجاع حساب مؤرشف بنفس بياناته ومعاملاته (المعاملات مرتبطة بالـid ولم تُمسّ وقت الأرشفة).
+  void restoreAccount(String id) {
+    final a = _acc[id];
+    if (a == null || a.del) return;
+    a.arch = false;
+    saveAccount(a);
+  }
   Account? account(String id) => _acc[id];
   String get defaultAcc => accList.isEmpty ? 'acc_main' : accList.first.id;
   void saveAccount(Account a) {

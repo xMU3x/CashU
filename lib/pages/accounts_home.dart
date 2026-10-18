@@ -138,7 +138,7 @@ class _AccountsHomeState extends State<AccountsHome> {
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Stack(clipBehavior: Clip.none, children: [
-                Icon(n > 0 ? Icons.notifications_rounded : Icons.notifications_none_rounded, size: 24, color: n > 0 ? kBlue : p.ink2),
+                Icon(n > 0 ? Icons.notifications_rounded : Icons.notifications_none_rounded, size: 26, color: n > 0 ? kBlue : p.ink2),
                 if (n > 0)
                   PositionedDirectional(
                     top: -5,
@@ -156,17 +156,33 @@ class _AccountsHomeState extends State<AccountsHome> {
         },
       );
 
+  /// «ما الجديد»: أيقونة ✨ مسطّحة بجوار الجرس، بتعرض الإضافات الجديدة في التطبيق.
+  Widget _whatsNew(Pal p) => Tap(
+        onTap: () => showSheet<void>(context, (c) => SheetFrame(
+              title: 'ما الجديد',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  for (final t in const ['قائمة «المزيد» بمربعات الاشتراكات والجمعيات والأقساط والسلف والمصاريف المتكررة', 'الحسابات المؤرشفة مع إمكانية الاسترجاع', 'قائمة المستخدم بالترتيب الجديد'])
+                    Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Icon(Icons.auto_awesome_outlined, size: 18, color: kBlue), const SizedBox(width: 10), Expanded(child: Text(t, style: const TextStyle(fontSize: 15)))])),
+                ]),
+              ),
+            )),
+        child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.auto_awesome_outlined, size: 26, color: p.ink2)),
+      );
+
   Widget _toolbar(Pal p) => Glass(
         radius: 30,
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Padding(padding: const EdgeInsets.all(8), child: Icon(S.flag('hide') ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 24, color: p.ink2))),
+          Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Padding(padding: const EdgeInsets.all(8), child: Icon(S.flag('hide') ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 26, color: p.ink2))),
           const SizedBox(width: 10),
-          Tap(onTap: () => setState(() => edit = true), child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.tune_rounded, size: 24, color: p.ink2))),
+          Tap(onTap: () => setState(() => edit = true), child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.tune_rounded, size: 26, color: p.ink2))),
           const SizedBox(width: 10),
-          Tap(onTap: _addAccountMenu, child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.create_new_folder_outlined, size: 24, color: p.ink2))),
+          Tap(onTap: _addAccountMenu, child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.create_new_folder_outlined, size: 26, color: p.ink2))),
           const SizedBox(width: 2),
+          _whatsNew(p),
           _bell(p),
         ]),
       );

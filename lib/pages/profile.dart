@@ -6,9 +6,6 @@ import '../ui/sheets.dart';
 import '../ui/theme.dart';
 import '../ui/widgets.dart';
 import 'settings_page.dart';
-import 'sms_pages.dart';
-import 'supervise.dart';
-import 'tools.dart';
 
 Future<void> showProfileSheet(BuildContext context) => showSheet<void>(context, (c) => const _ProfileSheet());
 
@@ -21,7 +18,9 @@ class _ProfileSheet extends StatelessWidget {
       animation: sync,
       builder: (c, _) {
         final u = sync.user;
-        final name = u == null ? 'ضيف' : ((u.userMetadata?['full_name'] ?? u.email ?? 'مستخدم') as String);
+        // الاسم = اسم المستخدم من الجيميل (اللي قبل @) فقط، والإيميل الكامل تحته بخط صغير.
+        final mail = u?.email ?? '';
+        final name = u == null ? 'ضيف' : (mail.contains('@') ? mail.split('@').first : (mail.isEmpty ? 'مستخدم' : mail));
         Widget row(IconData i, String t, VoidCallback f, {Widget? tr}) => Tap(
               onTap: f,
               child: Padding(
@@ -45,7 +44,7 @@ class _ProfileSheet extends StatelessWidget {
                   Row(children: [
                     Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: p.line, width: 2)), child: CircleAvatar(radius: 28, backgroundColor: const Color(0xFFB5295F), child: Text(name.characters.first.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 26)))),
                     const SizedBox(width: 14),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)), Text(u?.email ?? 'لم تسجّل الدخول', style: TextStyle(color: p.ink2))])),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)), Text(u?.email ?? 'لم تسجّل الدخول', style: TextStyle(color: p.ink2, fontSize: 12.5))])),
                   ]),
                   const SizedBox(height: 14),
                   if (u != null)
@@ -67,23 +66,12 @@ class _ProfileSheet extends StatelessWidget {
               const SizedBox(height: 12),
               Text(u == null ? 'سجّل الدخول لتتزامن بياناتك بين أجهزتك' : 'لا توجد حسابات أخرى بعد', style: TextStyle(color: p.ink2)),
               Divider(color: p.line, height: 28),
-              row(Icons.sms_rounded, 'تتبع رسائل البنك', () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(flowRoute(const SmsTrackingPage()));
-              }),
-              row(Icons.verified_user_outlined, 'الرقابة', () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(flowRoute(const Scaffold(body: SafeArea(child: SupervisePage()))));
-              }),
-              row(Icons.apps_rounded, 'الأدوات', () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(flowRoute(const ToolsPage()));
-              }),
               row(Icons.settings_rounded, 'الإعدادات', () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(flowRoute(const SettingsPage()));
               }),
               row(Icons.contrast_rounded, 'المظهر', () => showAppearanceSheet(context)),
+              row(Icons.language_rounded, 'اللغة', () => showLanguageSheet(context)),
               row(Icons.person_add_alt_1_rounded, 'إضافة حساب جوجل آخر', () async {
                 final e = await sync.google();
                 if (e != null && context.mounted) toast(context, e);

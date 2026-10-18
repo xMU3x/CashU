@@ -3,9 +3,7 @@ import '../ui/loc_text.dart';
 import '../ui/anim.dart';
 import '../ui/theme.dart';
 import '../ui/widgets.dart';
-import 'accounts.dart';
 import 'more_pages.dart';
-import 'settings_page.dart';
 
 class _Tool {
   final String name;
@@ -17,11 +15,8 @@ class _Tool {
 
 /// مجموعات الأدوات اللي بتظهر كصفوف مستقلة في تبويب «المزيد» (عنوان، وصف، أيقونة، لون).
 const kToolGroupRows = <(String, String, IconData, Color)>[
-  ('الالتزامات والمدفوعات', 'اشتراكات، سلف، أقساط، جمعيات، فواتير', Icons.receipt_long_rounded, Color(0xFFC96A4A)),
   ('المتابعة والتحليل', 'أهداف، مدخرات، تحدي الإنفاق، أسعار الصرف', Icons.insights_rounded, Color(0xFF2E7568)),
   ('AI', 'Flow AI · Flow Live · اكتب اللي صرفته', Icons.auto_awesome_rounded, Color(0xFF6D3FD0)),
-  ('الحسابات والإعدادات', 'حساباتي والإعدادات', Icons.manage_accounts_rounded, Color(0xFF3B6FD4)),
-  ('المشاركة والصلاحيات', 'الغرف المشتركة ومجتمع ميزانيتك', Icons.groups_2_rounded, Color(0xFF3B8FA8)),
   ('البيانات والنسخ الاحتياطي', 'نسخ احتياطي Drive واستيراد', Icons.cloud_sync_rounded, Color(0xFFB07A4A)),
 ];
 
@@ -42,31 +37,19 @@ class _ToolsState extends State<ToolsPage> {
     'rates': _Tool('أسعار الصرف', Icons.currency_exchange_rounded, const Color(0xFF3B8FA8), () => const RatesPage()),
     'flow': _Tool('Flow AI', Icons.auto_awesome_rounded, const Color(0xFF6D3FD0), () => const FlowAIPage()),
     'rec': _Tool('المصاريف المتكررة', Icons.autorenew_rounded, const Color(0xFF6D3FD0), () => const RecurringPage()),
-    'accs': _Tool('حساباتي', Icons.account_balance_wallet_rounded, const Color(0xFF3B6FD4), () => const AccountsPage()),
-    'settings': _Tool('الإعدادات', Icons.settings_rounded, const Color(0xFF6E6E73), () => const SettingsPage()),
-    'subs': _Tool('اشتراكاتي', Icons.widgets_rounded, const Color(0xFFB07A4A)),
-    'inst': _Tool('أقساطي', Icons.more_horiz_rounded, const Color(0xFF2E7568)),
-    'assoc': _Tool('الجمعيات', Icons.groups_rounded, const Color(0xFF2E7568)),
-    'appt': _Tool('مواعيدي', Icons.event_rounded, const Color(0xFF3B6FD4)),
-    'bills': _Tool('احفظ فواتيرك', Icons.description_rounded, const Color(0xFF3B8FA8)),
     'safe': _Tool('مدخراتي', Icons.savings_rounded, const Color(0xFF6E6E73)),
     'chal': _Tool('تحدي الإنفاق', Icons.local_fire_department_rounded, const Color(0xFFC0392B)),
     'simple': _Tool('بكل بساطة', Icons.apps_rounded, const Color(0xFF6F9A4A)),
     'live': _Tool('Flow Live', Icons.graphic_eq_rounded, const Color(0xFF6D3FD0)),
     'write': _Tool('اكتب اللي صرفته', Icons.edit_note_rounded, const Color(0xFFC2306A)),
-    'rooms': _Tool('الغرف المشتركة', Icons.groups_2_rounded, const Color(0xFF2E7568)),
-    'comm': _Tool('مجتمع ميزانيتك', Icons.diversity_3_rounded, const Color(0xFFC96A4A)),
     'drive': _Tool('نسخ احتياطي Drive', Icons.cloud_upload_rounded, const Color(0xFF3B6FD4)),
     'import': _Tool('استيراد من تطبيق آخر', Icons.download_rounded, const Color(0xFFC96A4A)),
   };
 
   static const groups = [
     ('الأكثر استخداماً', ['goals', 'loans', 'rates', 'flow', 'rec']),
-    ('الالتزامات والمدفوعات', ['subs', 'loans', 'rec', 'inst', 'assoc', 'appt', 'bills']),
     ('المتابعة والتحليل', ['goals', 'safe', 'chal', 'rates', 'simple']),
     ('AI', ['flow', 'live', 'write']),
-    ('الحسابات والإعدادات', ['accs', 'settings']),
-    ('المشاركة والصلاحيات', ['rooms', 'comm']),
     ('البيانات والنسخ الاحتياطي', ['drive', 'import']),
   ];
 
