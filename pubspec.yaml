@@ -46,14 +46,12 @@ flutter:
           weight: 600
         - asset: assets/fonts/Inter-700.ttf
           weight: 700
-    # Cairo (OFL) = خط العربية. Inter = الإنجليزي والأرقام. الترتيب مركزي في lib/ui/theme.dart:
-    # Inter أولًا (الحروف اللاتينية والأرقام) وCairo احتياطي فيستلم كل الحروف العربية.
-    - family: Cairo
+    - family: NotoSansArabic
       fonts:
-        - asset: assets/fonts/Cairo-400.ttf
-        - asset: assets/fonts/Cairo-500.ttf
+        - asset: assets/fonts/NotoSansArabic-400.ttf
+        - asset: assets/fonts/NotoSansArabic-500.ttf
           weight: 500
-        - asset: assets/fonts/Cairo-600.ttf
+        - asset: assets/fonts/NotoSansArabic-600.ttf
           weight: 600
-        - asset: assets/fonts/Cairo-700.ttf
+        - asset: assets/fonts/NotoSansArabic-700.ttf
           weight: 700

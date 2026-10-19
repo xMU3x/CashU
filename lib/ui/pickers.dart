@@ -69,7 +69,7 @@ class _TimeSheetState extends State<_TimeSheet> {
           SizedBox(
             height: 210,
             child: CupertinoTheme(
-              data: CupertinoThemeData(brightness: dark ? Brightness.dark : Brightness.light, textTheme: CupertinoTextThemeData(dateTimePickerTextStyle: TextStyle(fontFamily: kFontLatin, fontFamilyFallback: kFontFallback, fontFeatures: kTabular, color: p.ink, fontSize: 22))),
+              data: CupertinoThemeData(brightness: dark ? Brightness.dark : Brightness.light, textTheme: CupertinoTextThemeData(dateTimePickerTextStyle: TextStyle(color: p.ink, fontSize: 22))),
               child: CupertinoDatePicker(mode: CupertinoDatePickerMode.time, initialDateTime: widget.initial, onDateTimeChanged: (d) => sel = d),
             ),
           ),
