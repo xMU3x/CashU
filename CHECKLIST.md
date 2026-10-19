@@ -158,3 +158,9 @@
 - [ ] شعارات الخدمات: حروف ملوّنة بدل اللوجوهات الرسمية (حقوق/أصول غير متاحة)
 - [ ] انتقالات Material: المسارات الحالية (shared-axis) + ZoomPageTransitions في الثيم؛ لم تُراجع كل شاشة على جهاز
 - [ ] `flutter analyze` / `flutter test` / بناء APK — لم يُنفَّذ (لا Flutter SDK هنا)
+
+## جلسة الخطوط (Cairo للعربي + Inter للإنجليزي والأرقام) — فحص صياغة فقط، لم يُشغَّل Flutter هنا
+- [x] assets/fonts: Cairo-400/500/600/700 (نسخ ثابتة مولّدة من Cairo variable الرسمي بترخيص OFL) + OFL-Cairo.txt؛ حُذف NotoSansArabic بالكامل
+- [x] pubspec.yaml: تعريف Cairo بدل NotoSansArabic، وInter كما هو
+- [x] lib/ui/theme.dart: Inter أساسي + Cairo احتياطي (kFontArabic)؛ منتقي الوقت (Cupertino) يستخدم نفس الخطوط
+- [ ] `flutter analyze` / `flutter test` / مراجعة بصرية على جهاز (فاتح/داكن) — لم تُنفَّذ

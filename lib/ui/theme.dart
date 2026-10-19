@@ -41,9 +41,12 @@ class Pal extends ThemeExtension<Pal> {
   Pal lerp(ThemeExtension<Pal>? other, double t) => other is Pal ? (t < .5 ? this : other) : this;
 }
 
-/// الخط الأساسي للإنجليزي والأرقام (Inter ≈ SF Pro Text، ترخيص OFL) والاحتياطي للعربي (Noto Sans Arabic).
+/// الخطوط (مضمّنة محليًا، لا تحميل من الإنترنت):
+/// Inter = الإنجليزي والأرقام (الأساسي)، وCairo = العربية (احتياطي لكل حرف عربي).
+/// Inter ما فيهوش حروف عربية فالمحرك بيرجع لـ Cairo تلقائيًا حرف بحرف، فالنص المختلط يشتغل داخل نفس العنصر.
 const String kFontLatin = 'Inter';
-const List<String> kFontFallback = ['NotoSansArabic'];
+const String kFontArabic = 'Cairo';
+const List<String> kFontFallback = [kFontArabic];
 
 /// أرقام جدولية (متساوية العرض) لمحاذاة الأرقام المالية.
 const List<FontFeature> kTabular = [FontFeature.tabularFigures()];
