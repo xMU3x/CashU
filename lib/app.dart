@@ -21,6 +21,7 @@ import 'pages/assoc_inst.dart';
 import 'pages/sms_pages.dart' show SmsReviewPage;
 import 'ui/anim.dart';
 import 'ui/ios.dart';
+import 'ui/widgets.dart' show flowRoute;
 import 'ui/theme.dart';
 
 class CashUApp extends StatelessWidget {

@@ -6,7 +6,6 @@ import '../core/repo.dart';
 import '../core/settings.dart';
 import '../core/sync.dart';
 import '../core/i18n.dart';
-import '../core/util.dart';
 import '../ui/sheets.dart';
 import '../ui/theme.dart';
 import '../ui/widgets.dart';

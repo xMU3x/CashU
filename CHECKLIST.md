@@ -177,3 +177,11 @@
 - [x] إعادة التسمية: معرّف الحزمة القديم → com.cashu.cashu، والبادئة القديمة → cashu (كل المفاتيح) مع ترحيل محلي تلقائي + SQL للسيرفر، واسم الجدول/ملف الترحيل القديم → legacy_sync، وتحديث README
 - [ ] المتبقي الطبيعي: `tyr`/`legacy_sync` تظهر فقط داخل كود/SQL الترحيل عمدًا (لو حذفتها يضيع ترحيل البيانات القديمة)
 - [ ] `flutter pub get` / `flutter analyze` / `flutter test` / بناء APK / تجربة الحركة على جهاز — لم تُنفَّذ
+
+## إصلاح فشل خطوة Analyze في GitHub Actions
+- [x] السبب: lib/app.dart يستدعي flowRoute (معرّفة في ui/widgets.dart) بدون import → أخطاء undefined_function. الإصلاح: `import 'ui/widgets.dart' show flowRoute;`
+- [x] مسح كل ملفات lib بحثًا عن imports ناقصة لرموز المشروع: لا توجد غيرها
+- [x] إزالة imports غير مستخدمة (archived_accounts.dart ← models، settings_page.dart ← util) وإصلاح `\"` الزائدة في accounts_home.dart
+- [x] analysis_options.yaml: التحذيرات/الملاحظات (deprecated, unused, curly braces, string escapes) لا تُسقط الـ CI؛ تبقى الأخطاء الحقيقية فقط
+- [ ] ملحوظة: أرقام أسطر السجل (accounts_home 577 / subs_page 995...) أكبر من ملفات هذه النسخة؛ يعني المستودع عندك فيه نسخة مختلفة/مُنسَّقة. استبدل الملفات كلها بهذه النسخة
+- [ ] `flutter analyze` / `flutter test` / بناء APK — لم تُنفَّذ هنا (لا Flutter SDK)

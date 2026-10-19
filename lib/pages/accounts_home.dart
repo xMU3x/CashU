@@ -380,7 +380,7 @@ class _AccountsHomeState extends State<AccountsHome> {
           }
           a.arch = true;
           repo.saveAccount(a);
-          toast(context, '\"${a.name}\" archived');
+          toast(context, '"${a.name}" archived');
         }, danger: true),
         AccMenuAction(Icons.delete_outline_rounded, 'Delete', () => _delAcc(a), danger: true),
       ]);
