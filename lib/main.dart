@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/currency.dart';
 import 'core/extras.dart';
+import 'core/notify.dart';
 import 'core/repo.dart';
 import 'core/store.dart';
 import 'core/sync.dart';
@@ -25,5 +26,6 @@ Future<void> main() async {
     rates.refresh();
     repo.runRecurring();
     extras.runAuto();
+    notifier.init().catchError((Object e) => debugPrint('notify init: $e'));
   });
 }

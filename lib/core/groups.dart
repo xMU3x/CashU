@@ -19,9 +19,9 @@ const kGroupPalette = <Color>[
   Color(0xFFFFFFFF),
 ];
 
-/// بيانات المجموعة الإضافية (لون/عملة) محفوظة داخل الإعدادات tyr_set تحت المفتاح grpMeta.
+/// بيانات المجموعة الإضافية (لون/عملة) محفوظة داخل الإعدادات cashu_set تحت المفتاح grpMeta.
 Map<String, dynamic> _meta() {
-  final m = store.peekMap('tyr_set')['grpMeta'];
+  final m = store.peekMap('cashu_set')['grpMeta'];
   return m is Map ? Map<String, dynamic>.from(m) : <String, dynamic>{};
 }
 

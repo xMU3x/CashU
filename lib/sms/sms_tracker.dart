@@ -11,11 +11,11 @@ import 'sms_rules.dart';
 import 'sms_text.dart';
 
 // مفاتيح محلية فقط: غير موجودة في kSyncKeys فلا تُرفع للسيرفر أبدًا.
-const _kCfg = 'tyr_sms_cfg';
-const _kReview = 'tyr_sms_review';
-const _kLog = 'tyr_sms_log';
-const _kDone = 'tyr_sms_done'; // بصمة الرسالة -> id المعاملة المسجّلة
-const _kIgn = 'tyr_sms_ign'; // رسائل تجاهلها المستخدم (للاستقبال اللحظي فقط)
+const _kCfg = 'cashu_sms_cfg';
+const _kReview = 'cashu_sms_review';
+const _kLog = 'cashu_sms_log';
+const _kDone = 'cashu_sms_done'; // بصمة الرسالة -> id المعاملة المسجّلة
+const _kIgn = 'cashu_sms_ign'; // رسائل تجاهلها المستخدم (للاستقبال اللحظي فقط)
 
 /// حالة رسالة مالية بعد الفحص.
 enum SmsStatus { registered, pending, fresh, ignored }

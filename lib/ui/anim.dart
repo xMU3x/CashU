@@ -275,3 +275,17 @@ class DashPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant DashPainter o) => false;
 }
+
+/// ظهور الزر العائم بحركة (انزلاق + تكبير + تلاشي) بمنحنى M3 emphasized.
+class FabIn extends StatelessWidget {
+  final Widget child;
+  const FabIn({super.key, required this.child});
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 500),
+        curve: const Cubic(.05, .7, .1, 1),
+        builder: (_, v, c) => Opacity(opacity: v.clamp(0, 1).toDouble(), child: Transform.translate(offset: Offset(0, (1 - v) * 70), child: Transform.scale(scale: .6 + .4 * v, child: c))),
+        child: child,
+      );
+}

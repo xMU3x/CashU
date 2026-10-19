@@ -163,7 +163,7 @@ class Extras extends ChangeNotifier {
   void init() {
     load();
     store.changes.listen((k) {
-      if (k == 'tyr_sub' || k == 'tyr_assoc' || k == 'tyr_inst') {
+      if (k == 'cashu_sub' || k == 'cashu_assoc' || k == 'cashu_inst') {
         load();
         notifyListeners();
       }
@@ -179,9 +179,9 @@ class Extras extends ChangeNotifier {
       return o;
     }
 
-    _sub = rd('tyr_sub', Sub.fromJson);
-    _assoc = rd('tyr_assoc', Assoc.fromJson);
-    _inst = rd('tyr_inst', Inst.fromJson);
+    _sub = rd('cashu_sub', Sub.fromJson);
+    _assoc = rd('cashu_assoc', Assoc.fromJson);
+    _inst = rd('cashu_inst', Inst.fromJson);
   }
 
   void _put(String k, String id, Map<String, dynamic> j) {
@@ -196,7 +196,7 @@ class Extras extends ChangeNotifier {
   List<Sub> get subs => (_sub.values.where((s) => !s.del).toList()..sort((a, b) => a.name.compareTo(b.name)));
   void saveSub(Sub s) {
     s.u = _nowMs();
-    _put('tyr_sub', s.id, s.toJson());
+    _put('cashu_sub', s.id, s.toJson());
   }
 
   void delSub(Sub s) {
@@ -239,7 +239,7 @@ class Extras extends ChangeNotifier {
   List<Assoc> get assocs => (_assoc.values.where((a) => !a.del).toList()..sort((a, b) => a.name.compareTo(b.name)));
   void saveAssoc(Assoc a) {
     a.u = _nowMs();
-    _put('tyr_assoc', a.id, a.toJson());
+    _put('cashu_assoc', a.id, a.toJson());
   }
 
   void delAssoc(Assoc a) {
@@ -265,7 +265,7 @@ class Extras extends ChangeNotifier {
   List<Inst> get insts => (_inst.values.where((a) => !a.del).toList()..sort((a, b) => a.name.compareTo(b.name)));
   void saveInst(Inst i) {
     i.u = _nowMs();
-    _put('tyr_inst', i.id, i.toJson());
+    _put('cashu_inst', i.id, i.toJson());
   }
 
   void delInst(Inst i) {

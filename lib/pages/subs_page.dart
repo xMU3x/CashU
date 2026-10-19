@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart' hide Text;
 import '../core/extras.dart';
 import '../core/i18n.dart';
+import '../core/notify.dart';
 import '../core/repo.dart';
 import '../core/settings.dart';
 import '../ui/anim.dart';
@@ -280,10 +281,10 @@ class _SubsState extends State<SubscriptionsPage> {
           PositionedDirectional(
             end: 20,
             bottom: widget.embedded ? 104 : 28,
-            child: Tap(
+            child: FabIn(child: Tap(
               onTap: () => _addFlow(),
               child: Container(width: 64, height: 64, decoration: BoxDecoration(color: p.ink, borderRadius: BorderRadius.circular(22), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .3), blurRadius: 14, offset: const Offset(0, 6))]), child: Icon(Icons.add_rounded, color: p.bg, size: 30)),
-            ),
+            )),
           ),
         ]);
       }),
@@ -451,6 +452,7 @@ class _SubFormState extends State<SubFormPage> {
       ..budget = budget
       ..remind = remind;
     extras.saveSub(s);
+    if (remind >= 0) notifier.requestPermission();
     if (auto) extras.runAuto();
     if (mounted) Navigator.of(context).pop();
   }

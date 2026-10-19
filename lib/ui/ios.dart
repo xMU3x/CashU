@@ -434,9 +434,18 @@ Future<void> showPopMenu(BuildContext context, List<PopItem> items) {
 }
 
 Future<bool> confirmDialog(BuildContext context, String title, String msg, {String ok = 'Delete'}) async =>
-    await showDialog<bool>(
+    await showGeneralDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      barrierDismissible: true,
+      barrierLabel: 'Close',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      // M3: تلاشي + تكبير من 90% بمنحنى emphasized
+      transitionBuilder: (_, a, __, child) {
+        final k = CurvedAnimation(parent: a, curve: const Cubic(.3, 0, 0, 1), reverseCurve: Curves.easeInCubic);
+        return FadeTransition(opacity: k, child: ScaleTransition(scale: Tween<double>(begin: .9, end: 1).animate(k), child: child));
+      },
+      pageBuilder: (c, _, __) => AlertDialog(
         title: Text(title, style: const TextStyle(fontSize: 18)),
         content: Text(msg),
         actions: [
