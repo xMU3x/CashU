@@ -7,6 +7,7 @@ import 'ios.dart';
 import 'loc_text.dart';
 import 'sheets.dart';
 import 'theme.dart';
+import 'typography.dart';
 import 'widgets.dart';
 
 /// منتقي التاريخ كبانل سفلية مدمجة (نفس شكل لوحة المبلغ) بدل الحوار العائم.
@@ -69,7 +70,7 @@ class _TimeSheetState extends State<_TimeSheet> {
           SizedBox(
             height: 210,
             child: CupertinoTheme(
-              data: CupertinoThemeData(brightness: dark ? Brightness.dark : Brightness.light, textTheme: CupertinoTextThemeData(dateTimePickerTextStyle: TextStyle(color: p.ink, fontSize: 22))),
+              data: CupertinoThemeData(brightness: dark ? Brightness.dark : Brightness.light, textTheme: CupertinoTextThemeData(dateTimePickerTextStyle: AppTypography.base(color: p.ink, size: 22))),
               child: CupertinoDatePicker(mode: CupertinoDatePickerMode.time, initialDateTime: widget.initial, onDateTimeChanged: (d) => sel = d),
             ),
           ),

@@ -1,0 +1,96 @@
+name: Build CashU Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERSION_CODE_BASE: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Prepare Android project
+        run: bash tool/setup_android.sh
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Generate app icons
+        run: dart run flutter_launcher_icons
+      - name: Analyze
+        # الأخطاء (errors) توقف الـ workflow؛ التحذيرات والـ infos لا توقفه.
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Tests
+        run: flutter test
+      - name: Build release APK
+        env:
+          SECRET_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SECRET_KEY" ]; then
+            echo "::error::Secret SUPABASE_ANON_KEY غير مضبوط — مفتاح المشروع الجديد مطلوب للمزامنة"
+            exit 1
+          fi
+          case "$SECRET_KEY" in sb_secret_*) echo "::error::لا تستخدم مفتاح secret/service في التطبيق"; exit 1;; esac
+          DEFINE="--dart-define=SUPABASE_ANON_KEY=$SECRET_KEY"
+          flutter build apk --release --no-shrink \
+            --build-name=1.0.0 \
+            --build-number=$(( VERSION_CODE_BASE + GITHUB_RUN_NUMBER )) $DEFINE
+      - name: Sign release APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -e
+          mkdir -p dist
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          SRC=build/app/outputs/flutter-apk/app-release.apk
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > release.jks
+            KS_PASS="$KEYSTORE_PASSWORD"; ALIAS="$KEY_ALIAS"; K_PASS="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
+          else
+            echo "::warning::لا يوجد Keystore — توقيع بمفتاح مؤقت"
+            keytool -genkeypair -keystore release.jks -alias cashu -keyalg RSA -keysize 2048 \
+              -validity 10000 -storepass android -keypass android -dname "CN=CashU,O=CashU,C=EG"
+            KS_PASS=android; ALIAS=cashu; K_PASS=android
+          fi
+          "$BT/zipalign" -f -p 4 "$SRC" aligned.apk
+          "$BT/apksigner" sign --ks release.jks --ks-key-alias "$ALIAS" \
+            --ks-pass "pass:$KS_PASS" --key-pass "pass:$K_PASS" \
+            --out dist/cashu-release.apk aligned.apk
+          "$BT/apksigner" verify dist/cashu-release.apk
+          rm -f release.jks aligned.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cashu-release-apk
+          path: dist/cashu-release.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish to "latest" release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "CashU (latest build)" --notes "أحدث بناء تلقائي من main" --prerelease
+          gh release upload latest dist/cashu-release.apk --clobber
+          echo "https://github.com/${{ github.repository }}/releases/download/latest/cashu-release.apk" >> "$GITHUB_STEP_SUMMARY"

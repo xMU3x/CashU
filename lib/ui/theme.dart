@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Text;
+import 'typography.dart';
 
 const Color kInc = Color(0xFF2E7568);
 
@@ -41,23 +42,10 @@ class Pal extends ThemeExtension<Pal> {
   Pal lerp(ThemeExtension<Pal>? other, double t) => other is Pal ? (t < .5 ? this : other) : this;
 }
 
-/// الخط الأساسي للإنجليزي والأرقام (Inter ≈ SF Pro Text، ترخيص OFL) والاحتياطي للعربي (Noto Sans Arabic).
-const String kFontLatin = 'Inter';
-const List<String> kFontFallback = ['NotoSansArabic'];
-
-/// أرقام جدولية (متساوية العرض) لمحاذاة الأرقام المالية.
-const List<FontFeature> kTabular = [FontFeature.tabularFigures()];
-
-TextTheme _fontTheme(TextTheme t, Color ink) {
-  TextStyle? f(TextStyle? s) => s?.copyWith(fontFamily: kFontLatin, fontFamilyFallback: kFontFallback, fontFeatures: kTabular, color: s.color ?? ink);
-  return TextTheme(
-    displayLarge: f(t.displayLarge), displayMedium: f(t.displayMedium), displaySmall: f(t.displaySmall),
-    headlineLarge: f(t.headlineLarge), headlineMedium: f(t.headlineMedium), headlineSmall: f(t.headlineSmall),
-    titleLarge: f(t.titleLarge), titleMedium: f(t.titleMedium), titleSmall: f(t.titleSmall),
-    bodyLarge: f(t.bodyLarge), bodyMedium: f(t.bodyMedium), bodySmall: f(t.bodySmall),
-    labelLarge: f(t.labelLarge), labelMedium: f(t.labelMedium), labelSmall: f(t.labelSmall),
-  );
-}
+// الخطوط: انظر lib/ui/typography.dart (Plus Jakarta Sans للإنجليزي والأرقام + Readex Pro للعربي).
+const String kFontLatin = AppTypography.latin;
+const List<String> kFontFallback = AppTypography.fallback;
+const List<FontFeature> kTabular = AppTypography.tabular;
 
 ThemeData buildTheme(Pal p, bool dark) {
   final b = dark ? Brightness.dark : Brightness.light;
@@ -72,10 +60,10 @@ ThemeData buildTheme(Pal p, bool dark) {
     pageTransitionsTheme: const PageTransitionsTheme(builders: {TargetPlatform.android: ZoomPageTransitionsBuilder(), TargetPlatform.iOS: ZoomPageTransitionsBuilder()}),
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
-    textTheme: _fontTheme(ThemeData(brightness: b).textTheme.apply(bodyColor: p.ink, displayColor: p.ink), p.ink),
+    textTheme: AppTypography.textTheme(ThemeData(brightness: b).textTheme.apply(bodyColor: p.ink, displayColor: p.ink), p.ink),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: p.ink,
-      contentTextStyle: TextStyle(fontFamily: kFontLatin, fontFamilyFallback: kFontFallback, fontFeatures: kTabular, color: p.bg, fontSize: 14),
+      contentTextStyle: AppTypography.base(color: p.bg, size: 14),
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),

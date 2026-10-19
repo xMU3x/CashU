@@ -28,3 +28,9 @@
 - تعديل الحساب: Basic/Advanced + Custom URL للأيقونة.
 - حقول جديدة بالـ JSON (متوافقة مع الإصدارات القديمة): الحساب `grp,info,icon,nw,gb,ac,arch` — المعاملة `pay,pend` ونوع `adj`.
 - الأرقام والتسميات بالإنجليزية وLTR مثل الصور.
+
+## ملاحظة رفع الملفات (مهم)
+المجلدات والملفات اللي بتبدأ بنقطة (`.github/` و `.gitignore`) **مخفية**، وبتتخطّى لما ترفع المشروع بالسحب والإفلات على موقع GitHub أو من بعض تطبيقات الملفات.
+- لو الـ workflow ما ظهرش عندك: في المستودع اضغط **Add file → Create new file**، اكتب في خانة الاسم `.github/workflows/android-release.yml` ثم الصق محتوى `github_workflows/android-release.yml` واعمل Commit.
+- نفس الشيء لـ `.gitignore` (محتواه في `gitignore.txt`).
+- أو ارفع بـ git من الكمبيوتر (`git add -A`) فيرفع الملفات المخفية تلقائيًا.

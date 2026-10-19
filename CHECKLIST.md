@@ -158,3 +158,13 @@
 - [ ] شعارات الخدمات: حروف ملوّنة بدل اللوجوهات الرسمية (حقوق/أصول غير متاحة)
 - [ ] انتقالات Material: المسارات الحالية (shared-axis) + ZoomPageTransitions في الثيم؛ لم تُراجع كل شاشة على جهاز
 - [ ] `flutter analyze` / `flutter test` / بناء APK — لم يُنفَّذ (لا Flutter SDK هنا)
+
+## جلسة الخطوط: Plus Jakarta Sans (إنجليزي/أرقام) + Readex Pro (عربي) — فحص صياغة فقط، لم يُشغَّل Flutter هنا
+- [x] assets/fonts: PlusJakartaSans-400/500/600/700 وReadexPro-400/500/600/700 (نسخ ثابتة من الخطوط المتغيرة الرسمية، OFL) + ملفات الترخيص؛ حُذف Inter وNotoSansArabic
+- [x] lib/ui/typography.dart (جديد): AppTypography — الأساسي Plus Jakarta Sans والاحتياطي Readex Pro، TextTheme كامل، ونمط base لأي نص خارج الـTheme
+- [x] theme.dart/pickers.dart يستخدمان AppTypography؛ لا fontFamily مكتوب يدويًا في أي شاشة
+- [x] مقارنة قياسات: عرض اللاتيني ≈ 98% من Inter، والعربي ≈ 104% من Noto؛ ارتفاع السطر 1.26 / 1.25 — لذلك لم تُعدَّل أحجام أو مسافات
+- [ ] `flutter analyze` / `flutter test` / مراجعة بصرية للوضع الداكن على جهاز — لم تُنفَّذ
+
+## ملفات «ناقصة» عند الرفع
+- الملفات كلها موجودة داخل الـ zip (بما فيها `.github/workflows/android-release.yml` و`android_overlay/` و`tool/`)، لكن المجلدات المخفية (اللي تبدأ بنقطة) بتتخطّاها بعض طرق الرفع. أُضيفت نسخ ظاهرة: `github_workflows/android-release.yml` و`gitignore.txt` + شرح في README.
