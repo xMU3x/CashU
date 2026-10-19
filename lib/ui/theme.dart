@@ -69,6 +69,7 @@ ThemeData buildTheme(Pal p, bool dark) {
     scaffoldBackgroundColor: p.bg,
     colorScheme: ColorScheme.fromSeed(seedColor: p.acc, brightness: b).copyWith(primary: p.acc, surface: p.card),
     extensions: [p],
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {TargetPlatform.android: ZoomPageTransitionsBuilder(), TargetPlatform.iOS: ZoomPageTransitionsBuilder()}),
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
     textTheme: _fontTheme(ThemeData(brightness: b).textTheme.apply(bodyColor: p.ink, displayColor: p.ink), p.ink),

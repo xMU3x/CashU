@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app.dart';
 import 'core/currency.dart';
+import 'core/extras.dart';
 import 'core/repo.dart';
 import 'core/store.dart';
 import 'core/sync.dart';
@@ -12,6 +13,7 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await store.init();
   repo.init();
+  extras.init();
   rates.load();
   try {
     await sync.init();
@@ -22,5 +24,6 @@ Future<void> main() async {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     rates.refresh();
     repo.runRecurring();
+    extras.runAuto();
   });
 }

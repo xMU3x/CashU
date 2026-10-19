@@ -679,6 +679,18 @@ class _SplitState extends State<_SplitSheet> {
   double get sum => rows.fold(0.0, (a, r) => a + r.$2);
   double get left => double.parse((widget.total - sum).toStringAsFixed(2));
 
+  /// حساب تلقائي: لما تكتب مبلغ على حساب، الباقي يتخصم/يتضاف على الحساب الأول (أو الأخير لو عدّلت الأول).
+  void _rebalance(int edited) {
+    if (rows.length < 2) return;
+    final t = edited == 0 ? rows.length - 1 : 0;
+    var others = 0.0;
+    for (var k = 0; k < rows.length; k++) {
+      if (k != t) others += rows[k].$2;
+    }
+    final v = double.parse((widget.total - others).toStringAsFixed(2));
+    rows[t] = (rows[t].$1, v < 0 ? 0 : v);
+  }
+
   void _equal() => setState(() {
         final n = rows.length;
         final share = double.parse((widget.total / n).toStringAsFixed(2));
@@ -716,11 +728,11 @@ class _SplitState extends State<_SplitSheet> {
                 Tap(
                   onTap: () async {
                     final r = await showCalc(context, rows[i].$2, widget.cur);
-                    if (r != null && r >= 0) { setState(() => rows[i] = (rows[i].$1, r)); }
+                    if (r != null && r >= 0) { setState(() { rows[i] = (rows[i].$1, r); _rebalance(i); }); }
                   },
                   child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(14)), child: Text(fmt(rows[i].$2), style: TextStyle(color: p.acc, fontWeight: FontWeight.w700))),
                 ),
-                if (rows.length > 1) Tap(onTap: () => setState(() => rows.removeAt(i)), child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.close_rounded, color: p.ink2, size: 20))),
+                if (rows.length > 1) Tap(onTap: () => setState(() { rows.removeAt(i); if (rows.length == 1) { rows[0] = (rows[0].$1, widget.total); } else { _rebalance(rows.length - 1); } }), child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.close_rounded, color: p.ink2, size: 20))),
               ]),
             ),
           Row(children: [

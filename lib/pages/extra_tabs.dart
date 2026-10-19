@@ -8,7 +8,6 @@ import '../ui/ios.dart';
 import '../ui/sheets.dart';
 import '../ui/theme.dart';
 import '../ui/widgets.dart';
-import 'add_tx.dart';
 
 /// عنوان الصفحة داخل بانل واحدة، وزر الرجوع (لو موجود) جزء من نفس البانل بدل ما يكون زر عائم لوحده.
 Widget _bigTitle(String t, String sub, Pal p, {VoidCallback? back}) => Padding(
@@ -79,60 +78,6 @@ class BudgetsTab extends StatelessWidget {
               ),
             );
           }(),
-      ]);
-    });
-  }
-}
-
-/// تبويب المعاملات المجدولة (المتكررة).
-class ScheduledTab extends StatelessWidget {
-  /// embedded=true: تبويب في الشريط السفلي (بلا زر رجوع). غير ذلك: صفحة فرعية والرجوع داخل بانل العنوان.
-  final bool embedded;
-  const ScheduledTab({super.key, this.embedded = false});
-  static const _names = {'daily': 'Daily', 'weekly': 'Weekly', 'monthly': 'Monthly'};
-  @override
-  Widget build(BuildContext context) {
-    final p = Pal.of(context);
-    final top = MediaQuery.of(context).padding.top;
-    return Live(b: (c) {
-      final list = repo.recurring;
-      return ListView(padding: EdgeInsets.fromLTRB(16, top + 20, 16, 130), physics: const BouncingScrollPhysics(), children: [
-        _bigTitle('Subscriptions', '${list.length} repeating transaction${list.length == 1 ? '' : 's'}', p, back: !embedded ? () => Navigator.of(context).maybePop() : null),
-        if (list.isEmpty)
-          emptyState(p, Icons.autorenew_rounded, 'No scheduled transactions.\nOpen a transaction and choose Make Scheduled.')
-        else
-          Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: iosCard(p, r: 22),
-            child: Column(children: [
-              for (var i = 0; i < list.length; i++)
-                SwipeRow(
-                  key: ValueKey(list[i].id),
-                  bg: p.bg,
-                  leftW: 90,
-                  leftActions: swipeCircle(Icons.stop_circle_outlined, 'Stop', kRed, () => repo.saveTx(list[i].clone()..rep = 'none')),
-                  child: Tap(
-                    scale: .99,
-                    onTap: () => Navigator.of(context).push(sheetRoute(AddTxPage(edit: list[i]))),
-                    child: Container(
-                      color: p.card,
-                      padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
-                      child: Row(children: [
-                        Container(width: 42, height: 42, decoration: BoxDecoration(color: p.field.withValues(alpha: .55), borderRadius: BorderRadius.circular(11)), child: Icon(txIcon(list[i]).$1, color: txIcon(list[i]).$2, size: 22)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(txTitle(list[i]), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w500)),
-                            Text('${_names[list[i].rep] ?? ''} · Next ${enDate(DateTime.fromMillisecondsSinceEpoch(list[i].nx))}', style: TextStyle(fontSize: 13, color: p.ink2)),
-                          ]),
-                        ),
-                        Text(fixed2(list[i].amt), style: TextStyle(fontSize: 16.5, color: list[i].type == 'inc' ? kGreen : kRed)),
-                      ]),
-                    ),
-                  ),
-                ),
-            ]),
-          ),
       ]);
     });
   }

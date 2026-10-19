@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart' hide Text;
 import '../ui/loc_text.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 import '../core/currency.dart';
 import '../core/i18n.dart';
 import '../core/models.dart';
@@ -11,6 +10,7 @@ import '../core/settings.dart';
 import '../core/util.dart';
 import '../ui/anim.dart';
 import '../ui/ios.dart';
+import '../ui/pickers.dart';
 import '../ui/sheets.dart';
 import '../ui/theme.dart';
 import '../ui/widgets.dart';
@@ -37,13 +37,14 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
   DateTime when = DateTime.now();
   DateTime recv = DateTime.now();
   DateTime? due;
-  Tx? moveTx;
   bool swapped = false, pend = false, showAll = false, catPicked = false;
   List<(String, double)> splits = []; // تقسيم المبلغ على أكثر من حساب
   final noteE = TextEditingController(), noteI = TextEditingController(), noteL = TextEditingController(), noteT = TextEditingController(), person = TextEditingController();
 
   static const _segPages = [0, 1, 2, 5];
-  static const _titles = ['Expense', 'Income', 'Transfer', 'Move Transaction', 'Share Transaction', 'Loan', 'Balance Adjustment'];
+  static const _titles = ['Expense', 'Income', 'Transfer', '', '', 'Loan', 'Balance Adjustment'];
+  static const _tabCols = [kRed, kGreen, kBlue, kOrange];
+  static const _tabIcons = [Icons.trending_down_rounded, Icons.trending_up_rounded, Icons.swap_horiz_rounded, Icons.handshake_rounded];
 
   @override
   void initState() {
@@ -99,7 +100,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
   }
 
   // ---------- مساعدات ----------
-  Color _col(int pi) => pi == 0 ? kRed : (pi == 1 ? kGreen : kBlue);
+  Color _col(int pi) => pi == 0 ? kRed : (pi == 1 ? kGreen : (pi == 5 ? kOrange : kBlue));
   double _rate() => (cur == S.cur || !S.flag('conv', true)) ? 1.0 : rates.rate(cur, S.cur);
   void _bad() {
     shake.forward(from: 0);
@@ -123,39 +124,15 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
     if (r != null) setState(() => cur = r);
   }
 
-  /// يخلّي منتقي التاريخ/الوقت بنفس ألوان وحواف لوحة إدخال المبلغ (بطاقة داكنة/فاتحة، أزرق للتحديد).
-  Widget _pickerTheme(BuildContext c, Widget? child) {
-    final p = Pal.of(c);
-    final base = Theme.of(c);
-    return Theme(
-      data: base.copyWith(
-        colorScheme: base.colorScheme.copyWith(primary: kBlue, onPrimary: Colors.white, surface: p.card, onSurface: p.ink),
-        dialogTheme: DialogThemeData(backgroundColor: p.card, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28))),
-        datePickerTheme: DatePickerThemeData(backgroundColor: p.card, surfaceTintColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28))),
-        timePickerTheme: TimePickerThemeData(
-          backgroundColor: p.card,
-          dialBackgroundColor: p.field,
-          hourMinuteColor: p.field,
-          dayPeriodColor: p.field,
-          hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        ),
-        textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: kBlue)),
-      ),
-      child: child ?? const SizedBox.shrink(),
-    );
-  }
-
   Future<void> _pickDate(bool second) async {
     final base = second ? recv : when;
-    final d = await showDatePicker(context: context, initialDate: base, firstDate: DateTime(2000), lastDate: DateTime(2100), builder: _pickerTheme);
+    final d = await showDateSheet(context, base);
     if (d != null) {
       setState(() {
-        final n = DateTime(d.year, d.month, d.day, base.hour, base.minute);
         if (second) {
-          recv = n;
+          recv = d;
         } else {
-          when = n;
+          when = d;
         }
       });
     }
@@ -163,14 +140,13 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
 
   Future<void> _pickTime(bool second) async {
     final base = second ? recv : when;
-    final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(base), builder: _pickerTheme);
+    final t = await showTimeSheet(context, base);
     if (t != null) {
       setState(() {
-        final n = DateTime(base.year, base.month, base.day, t.hour, t.minute);
         if (second) {
-          recv = n;
+          recv = t;
         } else {
-          when = n;
+          when = t;
         }
       });
     }
@@ -202,20 +178,10 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
         if (amt <= 0 || acc == to) return _bad();
         repo.saveTx(Tx(id: widget.edit?.id ?? uid(), type: 'xfer', amt: amt, cur: cur, rate: _rate(), acc: acc, to: to, note: noteT.text.trim(), pend: pend, ts: when.millisecondsSinceEpoch));
         break;
-      case 3:
-        if (moveTx == null || to == moveTx!.acc) return _bad();
-        moveTx!.acc = to;
-        repo.saveTx(moveTx!);
-        break;
-      case 4:
-        if (moveTx == null) return _bad();
-        final t = moveTx!;
-        Share.share('${txTitle(t)} — ${fmt(t.amt)} ${curOf(t.cur).sym} — ${dateLabel(t.date)}');
-        return;
       case 5:
-        if (amt <= 0 || person.text.trim().isEmpty) return _bad();
+        if (amt <= 0 || payee.trim().isEmpty) return _bad();
         repo.addLoan(Loan(
-          id: uid(), dir: loanDir, person: person.text.trim(), amt: amt, cur: cur, rate: _rate(), acc: acc,
+          id: uid(), dir: loanDir, person: payee.trim(), amt: amt, cur: cur, rate: _rate(), acc: acc,
           due: due?.millisecondsSinceEpoch ?? 0, note: noteL.text.trim(), ts: when.millisecondsSinceEpoch,
         ));
         break;
@@ -246,7 +212,6 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
     if (again) {
       setState(() {
         amt = 0;
-        moveTx = null;
         payee = '';
         splits = [];
         for (final c in [noteE, noteI, noteL, noteT, person]) {
@@ -279,8 +244,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
           child: Row(children: [
             Icon(ic, color: p.ink2, size: 22),
             const SizedBox(width: 12),
-            if (label != null) ...[Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16))), const SizedBox(width: 10)],
-            Expanded(child: label != null ? Align(alignment: AlignmentDirectional.centerEnd, child: content) : content),
+            Expanded(child: content),
             if (trailing != null) trailing,
             if (chev) Icon(isAr ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22),
           ]),
@@ -309,7 +273,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
           Icons.exposure_rounded,
           Tap(
             onTap: () => _calc(allowNeg: neg),
-            child: Align(alignment: AlignmentDirectional.centerEnd, child: Text(amt == 0 ? '—' : fmt(amt), style: TextStyle(fontSize: 16, color: amt == 0 ? p.ink2.withValues(alpha: .75) : p.ink))),
+            child: Align(alignment: AlignmentDirectional.centerStart, child: Text(amt == 0 ? hint : fmt(amt), style: TextStyle(fontSize: 16, color: amt == 0 ? p.ink2.withValues(alpha: .75) : p.ink))),
           ),
           label: hint,
           chev: false,
@@ -317,7 +281,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
         ),
       );
 
-  Widget _textLine(Pal p, IconData ic, String hint, String value, void Function(String) set) => _line(p, ic, value.isEmpty ? _ph(p, '—') : _val(value), label: hint, onTap: () async {
+  Widget _textLine(Pal p, IconData ic, String hint, String value, void Function(String) set) => _line(p, ic, value.isEmpty ? _ph(p, hint) : _val(value), onTap: () async {
         final r = await promptText(context, hint, hint: hint, initial: value);
         if (r != null) setState(() => set(r.trim()));
       });
@@ -359,11 +323,11 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
         child: Row(children: [
           Icon(ic, color: p.ink2, size: 22),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontSize: 16)),
-          const Spacer(),
           _dateChip(p, enDate(d), () => _pickDate(second)),
           const SizedBox(width: 8),
           _dateChip(p, enTime(d), () => _pickTime(second)),
+          const SizedBox(width: 8),
+          Expanded(child: Align(alignment: AlignmentDirectional.centerEnd, child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, color: p.ink2.withValues(alpha: .8))))),
         ]),
       );
 
@@ -474,14 +438,17 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
       _card(p, [
         splits.length > 1 ? _splitLine(p) : _accLine(p, acc, (v) => acc = v),
         _amountLine(p),
-        _line(p, Icons.person_outline_rounded, payee.isEmpty ? _ph(p, '—') : _val(payee), label: 'Payee', onTap: () async {
+        _line(p, Icons.person_outline_rounded, payee.isEmpty ? _ph(p, 'Payee') : _val(payee), onTap: () async {
           final r = await showPayeeSheet(context, payee);
           if (r != null) setState(() => payee = r);
         }),
         _catLine(p, inc),
         if (showAll && !inc && catPicked) _subChips(p, c),
         _dateLine(p, Icons.calendar_month_rounded, 'Date & time', when, false),
-        _textLine(p, Icons.sell_outlined, 'Tags (comma separated)', tags, (v) => tags = v.split(RegExp(r'[,،]')).map((e) => e.trim()).where((e) => e.isNotEmpty).toSet().join(', ')),
+        _line(p, Icons.sell_outlined, tags.isEmpty ? _ph(p, 'Tags') : _val(tags), onTap: () async {
+          final r = await showTagsSheet(context, tags);
+          if (r != null) setState(() => tags = r);
+        }),
         _textLine(p, Icons.link_rounded, 'Attachment / Link', link, (v) => link = v),
         _statusLine(p),
         if (showAll) _repLine(p),
@@ -525,31 +492,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
     ]);
   }
 
-  Widget _txPick(Pal p, {bool too = true}) {
-    final t = moveTx;
-    return _line(p, Icons.drive_file_move_rounded, t == null ? _ph(p, 'Select transaction') : _val('${txTitle(t)} · ${fmt(t.amt)} ${curOf(t.cur).sym}'), label: 'Transaction', onTap: () async {
-      final r = await showPickTx(context, accId: too ? acc : null);
-      if (r != null) setState(() => moveTx = r);
-    });
-  }
-
-  Widget _move(Pal p) => _scroll([
-        _card(p, [
-          _accLine(p, acc, (v) {
-            acc = v;
-            moveTx = null;
-          }),
-          _txPick(p),
-          _accLine(p, to, (v) => to = v),
-        ]),
-        Padding(padding: const EdgeInsets.all(16), child: Text('The transaction moves to the new account with its amount, date and category unchanged.', textAlign: TextAlign.center, style: TextStyle(color: p.ink2, height: 1.5))),
-      ]);
-
-  Widget _send(Pal p) => _scroll([
-        _card(p, [_txPick(p, too: false)]),
-        Padding(padding: const EdgeInsets.all(16), child: Text('Pick a transaction, then tap Save to share it with anyone via any app.', textAlign: TextAlign.center, style: TextStyle(color: p.ink2, height: 1.5))),
-      ]);
-
+  /// سلفة/دين: نفس شكل المصروف بالظبط (حساب، مبلغ، المستفيد، تاريخ، وصف)، والفرق زر ليّا/عليّا.
   Widget _loan(Pal p) => _scroll([
         _card(p, [
           _accLine(p, acc, (v) => acc = v),
@@ -565,16 +508,16 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
               smallChip('I owe them', loanDir == 'owe', () => setState(() => loanDir = 'owe')),
             ]),
           ),
-          _line(p, Icons.person_outline_rounded, TextField(controller: person, style: const TextStyle(fontSize: 16), decoration: InputDecoration(border: InputBorder.none, isDense: true, hintText: 'Person name', hintStyle: TextStyle(color: p.ink2.withValues(alpha: .75)))), chev: false),
+          _line(p, Icons.person_outline_rounded, payee.isEmpty ? _ph(p, 'Payee') : _val(payee), onTap: () async {
+            final r = await showPayeeSheet(context, payee);
+            if (r != null) setState(() => payee = r);
+          }),
           _line(p, Icons.event_busy_rounded, due == null ? _ph(p, 'Due date (optional)') : _val(enDate(due!)), onTap: () async {
-            final d = await showDatePicker(context: context, initialDate: due ?? DateTime.now(), firstDate: DateTime.now().subtract(const Duration(days: 365)), lastDate: DateTime(2100));
+            final d = await showDateSheet(context, due ?? DateTime.now(), title: 'Due date');
             if (d != null) setState(() => due = d);
           }, trailing: due == null ? null : Tap(onTap: () => setState(() => due = null), child: Icon(Icons.cancel_rounded, color: p.ink2, size: 20))),
-          _line(p, Icons.text_fields_rounded, noteL.text.isEmpty ? _ph(p, 'Note') : _val(noteL.text), onTap: () async {
-            final r = await promptText(context, 'Note', hint: 'Note', initial: noteL.text);
-            if (r != null) setState(() => noteL.text = r.trim());
-          }),
           _dateLine(p, Icons.calendar_month_rounded, 'Date & time', when, false),
+          _noteBox(p, noteL),
         ]),
         Padding(
           padding: const EdgeInsets.all(16),
@@ -622,7 +565,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
             top: 0,
             bottom: 0,
             width: w,
-            child: AnimatedOpacity(duration: const Duration(milliseconds: 180), opacity: seg < 0 ? 0 : 1, child: Container(decoration: BoxDecoration(color: p.field, borderRadius: BorderRadius.circular(22)))),
+            child: AnimatedOpacity(duration: const Duration(milliseconds: 180), opacity: seg < 0 ? 0 : 1, child: Container(decoration: BoxDecoration(color: seg < 0 ? p.field : _tabCols[seg].withValues(alpha: .18), borderRadius: BorderRadius.circular(22)))),
           ),
           Row(children: [
             for (var i = 0; i < 4; i++)
@@ -631,7 +574,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
                 child: Tap(
                   scale: .96,
                   onTap: editing ? null : () => _go(_segPages[i]),
-                  child: Center(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, child: Text(labels[i], maxLines: 1, style: TextStyle(fontSize: 14, fontWeight: i == seg ? FontWeight.w700 : FontWeight.w500, color: i == seg ? const Color(0xFF64B5F6) : p.ink2))))),
+                  child: Center(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: FittedBox(fit: BoxFit.scaleDown, child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(_tabIcons[i], size: 17, color: _tabCols[i].withValues(alpha: i == seg ? 1 : .65)), const SizedBox(width: 4), Text(labels[i], maxLines: 1, style: TextStyle(fontSize: 14, fontWeight: i == seg ? FontWeight.w700 : FontWeight.w500, color: i == seg ? _tabCols[i] : p.ink2))])))),
                 ),
               ),
           ]),
@@ -680,7 +623,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
               FocusScope.of(context).unfocus();
               tick();
             },
-            children: [_money(p, false), _money(p, true), _xfer(p), _move(p), _send(p), _loan(p), _adj(p)],
+            children: [_money(p, false), _money(p, true), _xfer(p), const SizedBox.shrink(), const SizedBox.shrink(), _loan(p), _adj(p)],
           ),
         ),
       ),

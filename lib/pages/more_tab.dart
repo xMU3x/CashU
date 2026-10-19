@@ -10,6 +10,8 @@ import 'sms_pages.dart';
 import 'stats.dart';
 import 'tools.dart';
 import 'archived_accounts.dart';
+import 'assoc_inst.dart';
+import 'subs_page.dart';
 import 'more_pages.dart';
 import 'supervise.dart';
 
@@ -77,9 +79,9 @@ class MoreTab extends StatelessWidget {
     void push(Widget w) => Navigator.of(context).push(flowRoute(w));
     // الترتيب مطلوب بالظبط: اشتراكاتي، الجمعيات، أقساطي، السلف والديون، المصاريف المتكررة.
     final squares = <(IconData, Color, String, VoidCallback)>[
-      (Icons.widgets_rounded, const Color(0xFFB07A4A), 'اشتراكاتي', () => push(const SubPage(child: ScheduledTab()))),
-      (Icons.groups_rounded, const Color(0xFF2E7568), 'الجمعيات', () => soon(context, 'الجمعيات')),
-      (Icons.more_horiz_rounded, const Color(0xFF3B6FD4), 'أقساطي', () => soon(context, 'أقساطي')),
+      (Icons.widgets_rounded, const Color(0xFFB07A4A), 'اشتراكاتي', () => push(const SubscriptionsPage())),
+      (Icons.groups_rounded, const Color(0xFF2E7568), 'الجمعيات', () => push(const AssocPage())),
+      (Icons.more_horiz_rounded, const Color(0xFF3B6FD4), 'أقساطي', () => push(const InstPage())),
       (Icons.people_alt_rounded, const Color(0xFFC96A4A), 'السلف والديون', () => push(const LoansPage())),
       (Icons.autorenew_rounded, const Color(0xFF6D3FD0), 'المصاريف المتكررة', () => push(const RecurringPage())),
     ];

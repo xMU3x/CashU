@@ -37,5 +37,5 @@ const String kStorePrefix = 'tyr:';
 
 /// مفاتيح داخل جدول cash_sync (key text).
 const List<String> kSyncKeys = [
-  'tyr_acc', 'tyr_bud', 'tyr_tx', 'tyr_loan', 'tyr_goal', 'tyr_cat', 'tyr_ctg', 'tyr_set',
+  'tyr_acc', 'tyr_bud', 'tyr_tx', 'tyr_loan', 'tyr_goal', 'tyr_cat', 'tyr_ctg', 'tyr_set', 'tyr_sub', 'tyr_assoc', 'tyr_inst',
 ];

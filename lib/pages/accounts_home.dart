@@ -163,7 +163,7 @@ class _AccountsHomeState extends State<AccountsHome> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  for (final t in const ['قائمة «المزيد» بمربعات الاشتراكات والجمعيات والأقساط والسلف والمصاريف المتكررة', 'الحسابات المؤرشفة مع إمكانية الاسترجاع', 'قائمة المستخدم بالترتيب الجديد'])
+                  for (final t in const ['شاشة اشتراكاتي الجديدة: دونات ونسب وتجربة مجانية وسجل دفعات', 'الجمعيات والأقساط', 'الحسابات المؤرشفة مع إمكانية الاسترجاع', 'شريط سفلي جديد وتبويبات معاملات ملوّنة'])
                     Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Icon(Icons.auto_awesome_outlined, size: 18, color: kBlue), const SizedBox(width: 10), Expanded(child: Text(t, style: const TextStyle(fontSize: 15)))])),
                 ]),
               ),
@@ -234,18 +234,18 @@ class _AccountsHomeState extends State<AccountsHome> {
     final white = p.ink, dim = p.ink2;
     Widget mini(String l, double v, Color c, IconData ic, double frac) => Expanded(
           child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: glass(20),
+            padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+            decoration: glass(18),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Container(width: 34, height: 34, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(10)), child: Icon(ic, color: Colors.white, size: 19)),
-                const SizedBox(width: 10),
-                Text(l, style: TextStyle(fontSize: 14, color: c, fontWeight: FontWeight.w600)),
+                Container(width: 26, height: 26, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(8)), child: Icon(ic, color: Colors.white, size: 15)),
+                const SizedBox(width: 8),
+                Text(l, style: TextStyle(fontSize: 12.5, color: c, fontWeight: FontWeight.w600)),
               ]),
-              const SizedBox(height: 10),
-              Text(S.flag('hide') ? '••••' : egp(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: white)),
-              const SizedBox(height: 10),
-              ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: frac.clamp(0.0, 1.0), minHeight: 5, backgroundColor: p.ink.withValues(alpha: .08), valueColor: AlwaysStoppedAnimation(c))),
+              const SizedBox(height: 6),
+              Text(S.flag('hide') ? '••••' : egp(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: white)),
+              const SizedBox(height: 6),
+              ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: frac.clamp(0.0, 1.0), minHeight: 4, backgroundColor: p.ink.withValues(alpha: .08), valueColor: AlwaysStoppedAnimation(c))),
             ]),
           ),
         );
@@ -256,13 +256,13 @@ class _AccountsHomeState extends State<AccountsHome> {
     final up = chg >= 0;
     return Column(children: [
       Container(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-        decoration: glass(26),
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+        decoration: glass(22),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Text('Net Worth', style: TextStyle(fontSize: 15, color: white)),
+            Text('Net Worth', style: TextStyle(fontSize: 13, color: white)),
             const SizedBox(width: 8),
-            Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Icon(S.flag('hide') ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 20, color: dim)),
+            Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Icon(S.flag('hide') ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 18, color: dim)),
             const Spacer(),
             // شارة النسبة: أصغر ومرفوعة في سطر العنوان عشان ما تتداخلش مع خط التقدم
             Container(
@@ -275,13 +275,13 @@ class _AccountsHomeState extends State<AccountsHome> {
               ]),
             ),
           ]),
+          const SizedBox(height: 2),
+          Text(S.flag('hide') ? '••••••' : egp(repo.netWorth), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: white)),
           const SizedBox(height: 4),
-          Text(S.flag('hide') ? '••••••' : egp(repo.netWorth), style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: white)),
-          const SizedBox(height: 10),
-          SizedBox(height: 64, width: double.infinity, child: CustomPaint(painter: _SparkPainter(pts, kGreen))),
+          SizedBox(height: 38, width: double.infinity, child: CustomPaint(painter: _SparkPainter(pts, kGreen))),
         ]),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 8),
       Row(children: [
         mini('Assets', assets, const Color(0xFF3DA5FF), Icons.account_balance_wallet_rounded, total > 0 ? assets / total : 0),
         const SizedBox(width: 10),

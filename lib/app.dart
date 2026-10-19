@@ -11,7 +11,8 @@ import 'core/sync.dart';
 import 'core/util.dart';
 import 'pages/acc_tx.dart';
 import 'pages/accounts_home.dart';
-import 'pages/extra_tabs.dart';
+import 'pages/subs_page.dart';
+import 'core/extras.dart';
 import 'pages/more_tab.dart';
 import 'ui/anim.dart';
 import 'ui/ios.dart';
@@ -71,6 +72,7 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
     if (s == AppLifecycleState.resumed) {
       sync.onResume();
       repo.runRecurring();
+      extras.runAuto();
       smsTracker.drainNative();
     }
   }
@@ -84,23 +86,20 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
   Widget _item(int i, IconData ic, String label) {
     final on = tab == i;
     final p = Pal.of(context);
-    final c = on ? kBlue : p.ink2;
+    final c = on ? kBlue : p.ink;
     return Expanded(
       child: Tap(
-        scale: .93,
+        scale: .95,
         onTap: () => _go(i),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 260),
+          duration: const Duration(milliseconds: 280),
           curve: Curves.easeOutCubic,
-          margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-          decoration: BoxDecoration(color: on ? p.ink.withValues(alpha: .09) : Colors.transparent, borderRadius: BorderRadius.circular(24)),
+          margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
+          decoration: BoxDecoration(color: on ? p.field : Colors.transparent, borderRadius: BorderRadius.circular(28)),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(ic, color: c, size: 24),
-            // الاسم يظهر تحت الأيقونة المختارة فقط
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              child: on ? Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: c, fontSize: 11, fontWeight: FontWeight.w600)) : const SizedBox.shrink(),
-            ),
+            Icon(ic, color: c, size: 27),
+            const SizedBox(height: 2),
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: c, fontSize: 12.5, fontWeight: on ? FontWeight.w600 : FontWeight.w500)),
           ]),
         ),
       ),
@@ -112,7 +111,7 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
     final p = Pal.of(context);
     final bottom = MediaQuery.of(context).padding.bottom;
     // ترتيب العناصر يتبع اتجاه اللغة تلقائيًا (RTL/LTR) عبر Directionality.
-    final pages = <Widget>[const AccountsHome(), const AccountTxPage(embedded: true), const ScheduledTab(embedded: true), const MoreTab()];
+    final pages = <Widget>[const AccountsHome(), const AccountTxPage(embedded: true), const SubscriptionsPage(embedded: true), const MoreTab()];
     return Scaffold(
       backgroundColor: p.bg,
       body: Stack(children: [
@@ -128,13 +127,14 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
           left: 14,
           right: 14,
           bottom: 10 + bottom,
-          child: Glass(
-            radius: 32,
-            height: 62,
+          child: Container(
+            height: 70,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(color: p.card.withValues(alpha: .97), borderRadius: BorderRadius.circular(35), border: Border.all(color: p.line.withValues(alpha: .8)), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 18, offset: const Offset(0, 6))]),
             child: Row(children: [
               _item(0, Icons.account_balance_wallet_rounded, 'Accounts'),
               _item(1, Icons.format_list_bulleted_rounded, 'Transactions'),
-              _item(2, Icons.autorenew_rounded, 'Subscriptions'),
+              _item(2, Icons.widgets_rounded, 'Subscriptions'),
               _item(3, Icons.grid_view_rounded, 'More'),
             ]),
           ),

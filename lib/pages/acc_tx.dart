@@ -15,6 +15,7 @@ import '../ui/theme.dart';
 import '../ui/widgets.dart';
 import 'acc_edit.dart';
 import 'add_tx.dart';
+import 'notif_bell.dart';
 
 /// كشف حساب (أو كل المعاملات لو [acc] = null) بتصميم MoneyWiz.
 class AccountTxPage extends StatefulWidget {
@@ -531,6 +532,7 @@ class _AccountTxState extends State<AccountTxPage> {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
+        const NotifBell(),
         Tap(onTap: _moreMenu, child: Container(width: 38, height: 38, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: p.ink2, width: 1.4)), child: Icon(Icons.more_horiz_rounded, color: p.ink2, size: 22))),
         const SizedBox(width: 8),
         Tap(onTap: () => Navigator.of(context).push(sheetRoute(AddTxPage(accId: a?.id))), child: Container(width: 40, height: 40, decoration: const BoxDecoration(color: kBlue, shape: BoxShape.circle), child: const Icon(Icons.add_rounded, color: Colors.white, size: 26))),
