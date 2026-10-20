@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# يولّد مجلد android بأداة Flutter الحالية ثم يطبّق إعدادات التطبيق (المعرّف com.cashu.cashu + المانيفست + كود Kotlin للرسائل + JVM 17)
+# يولّد مجلد android بأداة Flutter الحالية ثم يطبّق إعدادات التطبيق (المعرّف com.werd.cashu + المانيفست + كود Kotlin للرسائل + JVM 17)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 if [ ! -d android ]; then
-  flutter create --platforms=android --org com.cashu --project-name cashu --no-pub .
+  flutter create --platforms=android --org com.werd --project-name cashu --no-pub .
 fi
 # Flutter may generate its stock widget_test.dart, which refers to MyApp.
 # This project uses CashUApp and already has its own calc tests.
@@ -18,10 +18,10 @@ mkdir -p "$GH"
 cp tool/gradle-jvm17.init.gradle "$GH/cashu-jvm17.gradle"
 APPID=$(grep -R "applicationId" android/app/build.gradle* | head -1 || true)
 echo "$APPID"
-echo "$APPID" | grep -q "com.cashu.cashu" || { echo "معرّف الحزمة غير مطابق (المتوقع com.cashu.cashu)"; exit 1; }
+echo "$APPID" | grep -q "com.werd.cashu" || { echo "معرّف الحزمة غير مطابق (المتوقع com.werd.cashu)"; exit 1; }
 
 # كود Android الخاص بتتبع رسائل البنك (يستبدل MainActivity ويضيف المستقبِل والطابور)
-PKG="com.cashu.cashu"
+PKG="com.werd.cashu"
 KDIR="android/app/src/main/kotlin/$(echo "$PKG" | tr . /)"
 mkdir -p "$KDIR"
 for f in android_overlay/kotlin/*.kt; do

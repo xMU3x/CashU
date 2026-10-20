@@ -42,6 +42,13 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
   final noteE = TextEditingController(), noteI = TextEditingController(), noteL = TextEditingController(), noteT = TextEditingController(), person = TextEditingController();
 
   static const _segPages = [0, 1, 2, 5];
+
+  /// الصفحات الفعلية في الـ PageView: الأربع الأساسية فقط، أو صفحة التسوية فقط عند تعديل تسوية قديمة.
+  List<int> get _views => (widget.edit != null && widget.edit!.type == 'adj') ? const [6] : _segPages;
+  int _vi(int logical) {
+    final i = _views.indexOf(logical);
+    return i < 0 ? 0 : i;
+  }
   static const _titles = ['Expense', 'Income', 'Transfer', '', '', 'Loan', 'Balance Adjustment'];
   static const _tabCols = [kRed, kGreen, kBlue, kOrange];
   static const _tabIcons = [Icons.trending_down_rounded, Icons.trending_up_rounded, Icons.swap_horiz_rounded, Icons.handshake_rounded];
@@ -86,7 +93,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
         noteE.text = e.note;
       }
     }
-    pc = PageController(initialPage: page);
+    pc = PageController(initialPage: _vi(page));
   }
 
   @override
@@ -107,7 +114,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
     HapticFeedback.heavyImpact();
   }
 
-  void _go(int i) => pc.animateToPage(i, duration: const Duration(milliseconds: 420), curve: Curves.easeOutCubic);
+  void _go(int i) => pc.animateToPage(_vi(i), duration: const Duration(milliseconds: 420), curve: Curves.easeOutCubic);
 
   Future<void> _calc({bool allowNeg = false}) async {
     final r = await showCalc(context, amt, cur);
@@ -205,8 +212,6 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
           break;
         }
     }
-    final box = saveKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null) { coinBurst(context, box.localToGlobal(box.size.center(Offset.zero))); }
     HapticFeedback.mediumImpact();
     if (S.flag('sound', true)) SystemSound.play(SystemSoundType.click);
     if (again) {
@@ -219,9 +224,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
         }
       });
     } else {
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted) Navigator.of(context).pop();
-      });
+      if (mounted) Navigator.of(context).pop();
     }
   }
 
@@ -235,18 +238,18 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
 
   /// سطر حقل: الأيقونة + اسم الحقل في البداية (يمين في العربي / شمال في الإنجليزي)،
   /// والقيمة/المدخل في النهاية (شمال في العربي / يمين في الإنجليزي). الاتجاه تلقائي من Directionality.
-  Widget _line(Pal p, IconData ic, Widget content, {VoidCallback? onTap, bool chev = true, Widget? trailing, String? label}) => Tap(
+  Widget _line(Pal p, IconData ic, Widget content, {VoidCallback? onTap, bool chev = true, Widget? trailing, String? label, Widget? leading}) => Tap(
         onTap: onTap,
         scale: .99,
         child: Container(
           height: 52,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(children: [
-            Icon(ic, color: p.ink2, size: 22),
+            leading ?? Icon(ic, color: p.ink2, size: 22),
             const SizedBox(width: 12),
             Expanded(child: content),
             if (trailing != null) trailing,
-            if (chev) Icon(isAr ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22),
+            if (chev) Icon(Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22),
           ]),
         ),
       );
@@ -259,7 +262,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
     final Widget content = a == null
         ? _ph(p, hint ?? 'Select Account')
         : Text.rich(TextSpan(children: [TextSpan(text: a.name, style: const TextStyle(fontSize: 16)), TextSpan(text: ' (${egp(repo.bal(a.id))})', style: TextStyle(fontSize: 15, color: p.ink2))]), maxLines: 1, overflow: TextOverflow.ellipsis);
-    return _line(p, Icons.credit_card_rounded, content, label: label, chev: !reserve, trailing: reserve ? const SizedBox(width: 48) : null, onTap: () async {
+    return _line(p, Icons.credit_card_rounded, content, leading: a == null ? null : accIcon(a, size: 22), label: label, chev: !reserve, trailing: reserve ? const SizedBox(width: 48) : null, onTap: () async {
       final r = await showPickAccount(context, id, exclude: exclude);
       if (r != null) setState(() => set(r));
     });
@@ -277,7 +280,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
           ),
           label: hint,
           chev: false,
-          trailing: Padding(padding: const EdgeInsetsDirectional.only(start: 10), child: Tap(onTap: _cur, child: Row(children: [Text(cur, style: const TextStyle(fontSize: 16, color: kBlue)), Icon(isAr ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22)]))),
+          trailing: Padding(padding: const EdgeInsetsDirectional.only(start: 10), child: Tap(onTap: _cur, child: Container(padding: const EdgeInsetsDirectional.only(start: 12, end: 4, top: 5, bottom: 5), decoration: BoxDecoration(color: p.field, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: .35), blurRadius: 6, offset: const Offset(0, 3))]), child: Row(mainAxisSize: MainAxisSize.min, children: [Text(cur, style: const TextStyle(fontSize: 16, color: kBlue, fontWeight: FontWeight.w600)), Icon(Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22)])))),
         ),
       );
 
@@ -556,12 +559,11 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
       decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(26), border: Border.all(color: p.line)),
       child: LayoutBuilder(builder: (c, bc) {
         final w = bc.maxWidth / 4;
-        return Directionality(textDirection: isAr ? TextDirection.rtl : TextDirection.ltr, child: Stack(children: [
-          AnimatedPositioned(
+        return Stack(children: [
+          AnimatedPositionedDirectional(
             duration: const Duration(milliseconds: 280),
             curve: Curves.easeOutCubic,
-            left: isAr ? null : (seg < 0 ? 0 : seg) * w,
-            right: isAr ? (seg < 0 ? 0 : seg) * w : null,
+            start: (seg < 0 ? 0 : seg) * w,
             top: 0,
             bottom: 0,
             width: w,
@@ -578,7 +580,7 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
                 ),
               ),
           ]),
-        ]));
+        ]);
       }),
     );
   }
@@ -594,14 +596,14 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
         child: AnimatedBuilder(
           animation: pc,
           builder: (ctx, child) {
-            final v = (pc.hasClients && pc.position.haveDimensions) ? (pc.page ?? page.toDouble()) : page.toDouble();
-            final pi = v.round().clamp(0, 6);
+            final v = (pc.hasClients && pc.position.haveDimensions) ? (pc.page ?? _vi(page).toDouble()) : _vi(page).toDouble();
+            final pi = _views[v.round().clamp(0, _views.length - 1)];
             final col = _col(pi);
             return Column(children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Row(textDirection: isAr ? TextDirection.ltr : TextDirection.rtl, children: [
-                  Directionality(textDirection: isAr ? TextDirection.ltr : TextDirection.rtl, child: GlassBtn(Icons.arrow_back_rounded, () => Navigator.of(context).pop(), size: 46)),
+                child: Row(children: [
+                  GlassBtn(Icons.arrow_back_rounded, () => Navigator.of(context).pop(), size: 46),
                   const SizedBox(width: 12),
                   Expanded(child: Text(textAlign: TextAlign.center, editing ? 'Edit ${_titles[pi]}' : (_segPages.contains(pi) ? 'New transaction' : _titles[pi]), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))),
                   const SizedBox(width: 8),
@@ -619,11 +621,11 @@ class _AddTxState extends State<AddTxPage> with TickerProviderStateMixin {
             controller: pc,
             physics: editing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
             onPageChanged: (i) {
-              setState(() => page = i);
+              setState(() => page = _views[i]);
               FocusScope.of(context).unfocus();
               tick();
             },
-            children: [_money(p, false), _money(p, true), _xfer(p), const SizedBox.shrink(), const SizedBox.shrink(), _loan(p), _adj(p)],
+            children: _views.length == 1 ? [_adj(p)] : [_money(p, false), _money(p, true), _xfer(p), _loan(p)],
           ),
         ),
       ),

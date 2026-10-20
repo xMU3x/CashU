@@ -41,6 +41,9 @@ class _AccountTxState extends State<AccountTxPage> {
   /// عرض جدولي مضغوط (Table View).
   bool table = false;
 
+  /// الشهر المعروض في تبويب المعاملات.
+  DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
+
   /// وضع التحديد المتعدد (Bulk edit) والمعاملات المحددة.
   bool bulk = false;
   final sel = <String>{};
@@ -586,6 +589,125 @@ class _AccountTxState extends State<AccountTxPage> {
     );
   }
 
+  String _monthLabel(DateTime d) => '${monthEn(d.month)} ${isAr ? toAr('${d.year}') : '${d.year}'}';
+
+  /// نافذة اختيار الشهر: سنة بأسهم + شبكة ١٢ شهر، وتنقلني مباشرة للشهر المطلوب.
+  Future<void> _pickMonth() async {
+    final r = await showSheet<DateTime>(context, (c) {
+      var year = month.year;
+      return StatefulBuilder(builder: (c, set) {
+        final p = Pal.of(c);
+        return SheetFrame(
+          title: 'اختر الشهر',
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Tap(onTap: () => set(() => year--), child: const Padding(padding: EdgeInsets.all(10), child: Icon(Icons.chevron_left_rounded))),
+                SizedBox(width: 90, child: Center(child: Text(isAr ? toAr('$year') : '$year', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)))),
+                Tap(onTap: () => set(() => year++), child: const Padding(padding: EdgeInsets.all(10), child: Icon(Icons.chevron_right_rounded))),
+              ]),
+              const SizedBox(height: 8),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                for (var m = 1; m <= 12; m++)
+                  Tap(
+                    onTap: () => Navigator.of(c).pop(DateTime(year, m)),
+                    child: Container(
+                      width: (MediaQuery.of(c).size.width - 32 - 16) / 3,
+                      height: 46,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: (year == month.year && m == month.month) ? kBlue : p.field, borderRadius: BorderRadius.circular(16)),
+                      child: Text(monthEn(m), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: (year == month.year && m == month.month) ? Colors.white : p.ink)),
+                    ),
+                  ),
+              ]),
+            ]),
+          ),
+        );
+      });
+    });
+    if (r != null) setState(() => month = r);
+  }
+
+  /// بانل مبسّطة: الصافي · الدخل · المصروف (كل واحد بلونه).
+  Widget _summaryPanel(Pal p, double inn, double out) {
+    final net = inn - out;
+    Widget col(String l, double v, Color c) => Expanded(
+          child: Column(children: [
+            Text(l, style: TextStyle(fontSize: 12.5, color: p.ink2)),
+            const SizedBox(height: 4),
+            Text(S.flag('hide') ? '••••' : egp(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c)),
+          ]),
+        );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(22), border: Border.all(color: p.line.withValues(alpha: .7))),
+      child: Row(children: [
+        col('الصافي', net, net < 0 ? kRed : p.ink),
+        col('الدخل', inn, kGreen),
+        col('المصروف', out, kRed),
+      ]),
+    );
+  }
+
+  Widget _compactSearch(Pal p) => Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(20), border: Border.all(color: p.line.withValues(alpha: .7))),
+        child: Row(children: [
+          Icon(Icons.search_rounded, color: p.ink2, size: 20),
+          const SizedBox(width: 8),
+          Expanded(child: TextField(controller: q, onChanged: (_) => setState(() {}), style: const TextStyle(fontSize: 14.5), decoration: InputDecoration(border: InputBorder.none, isDense: true, hintText: 'ابحث بالتاجر أو الملاحظة أو التصنيف أو #وسم', hintStyle: TextStyle(color: p.ink2, fontSize: 14)))),
+        ]),
+      );
+
+  /// واجهة تبويب «المعاملات» الجديدة.
+  Widget _activityBody(Pal p) => Live(b: (c) {
+        final text = q.text.trim().toLowerCase();
+        bool match(Tx t) => text.isEmpty || _title(t).toLowerCase().contains(text) || t.note.toLowerCase().contains(text) || t.pay.toLowerCase().contains(text) || t.tags.toLowerCase().contains(text);
+        final base = repo.txOf(widget.acc?.id).where(match).toList();
+        final inMonth = base.where((t) => t.date.year == month.year && t.date.month == month.month).toList();
+        _visible = inMonth;
+        final done = inMonth.where((t) => !t.pend).toList();
+        double out(List<Tx> l) => l.fold(0.0, (s, t) => s + (_dir(t) < 0 ? t.base : 0));
+        double inn(List<Tx> l) => l.fold(0.0, (s, t) => s + (_dir(t) > 0 ? t.base : 0));
+        final rows = _sorted(inMonth);
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 12, 0),
+            child: Row(children: [
+              const Expanded(child: Text('المعاملات', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800))),
+              Tap(onTap: _moreMenu, child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.more_horiz_rounded, color: p.ink2, size: 24))),
+              Tap(onTap: () => Navigator.of(context).push(sheetRoute(AddTxPage(accId: widget.acc?.id))), child: Container(width: 38, height: 38, decoration: const BoxDecoration(color: kBlue, shape: BoxShape.circle), child: const Icon(Icons.add_rounded, color: Colors.white, size: 24))),
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+            child: Tap(
+              onTap: _pickMonth,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(color: p.field, borderRadius: BorderRadius.circular(20)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text(_monthLabel(month), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.keyboard_arrow_down_rounded, size: 22, color: p.ink2),
+                ]),
+              ),
+            ),
+          ),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: _summaryPanel(p, inn(done), out(done))),
+          Padding(padding: const EdgeInsets.fromLTRB(16, 10, 16, 8), child: _compactSearch(p)),
+          Expanded(
+            child: rows.isEmpty
+                ? ListView(children: [emptyState(p, Icons.folder_open_rounded, 'No transactions yet')])
+                : ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 130), physics: const BouncingScrollPhysics(), children: [
+                    Column(children: [for (var i = 0; i < rows.length; i++) _row(p, rows[i], first: i == 0, last: i == rows.length - 1)]),
+                  ]),
+          ),
+        ]);
+      });
+
   Widget _searchBar(Pal p) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
         child: Container(
@@ -607,7 +729,7 @@ class _AccountTxState extends State<AccountTxPage> {
       backgroundColor: p.bg,
       body: SafeArea(
         bottom: false,
-        child: Column(children: [
+        child: (widget.embedded && !bulk && widget.acc == null) ? _activityBody(p) : Column(children: [
           _header(p),
           if (S.flag('txSearch', true)) _searchBar(p),
           const SizedBox(height: 6),

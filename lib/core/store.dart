@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
-/// تخزين محلي أولًا + طابع زمني لكل مفتاح مزامَن (`__meta`).
+/// تخزين محلي أولًا + طابع زمني لكل مفتاح مزامَن (`__meta`) — نفس آلية دُرَر.
 class Store extends ChangeNotifier {
   late SharedPreferences _p;
   Map<String, int> meta = {};
@@ -13,39 +13,7 @@ class Store extends ChangeNotifier {
 
   Future<void> init() async {
     _p = await SharedPreferences.getInstance();
-    await _migrateLegacyPrefix();
     meta = readIntMap('__meta');
-  }
-
-  /// ترحيل لمرة واحدة: بيانات الإصدارات القديمة كانت بالبادئة `tyr:` ومفاتيحها `tyr_*`؛ تُنقل إلى `cashu:` / `cashu_*` دون فقد.
-  Future<void> _migrateLegacyPrefix() async {
-    const old = 'tyr:';
-    final keys = _p.getKeys().where((k) => k.startsWith(old)).toList();
-    for (final k in keys) {
-      final nk = '$kStorePrefix${k.substring(old.length).replaceFirst(RegExp(r'^tyr_'), 'cashu_')}';
-      final v = _p.get(k);
-      if (!_p.containsKey(nk)) {
-        if (v is String) {
-          var out = v;
-          if (k == '${old}__meta') {
-            try {
-              final m = (jsonDecode(v) as Map).map((a, b) => MapEntry((a as String).replaceFirst(RegExp(r'^tyr_'), 'cashu_'), b));
-              out = jsonEncode(m);
-            } catch (_) {}
-          }
-          await _p.setString(nk, out);
-        } else if (v is bool) {
-          await _p.setBool(nk, v);
-        } else if (v is int) {
-          await _p.setInt(nk, v);
-        } else if (v is double) {
-          await _p.setDouble(nk, v);
-        } else if (v is List<String>) {
-          await _p.setStringList(nk, v);
-        }
-      }
-      await _p.remove(k);
-    }
   }
 
   Map<String, int> readIntMap(String k) {

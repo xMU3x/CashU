@@ -17,7 +17,6 @@ import 'acc_edit.dart';
 import 'acc_tx.dart';
 import 'add_tx.dart';
 import 'group_edit.dart';
-import 'sms_pages.dart' show SmsReviewPage;
 import 'profile.dart';
 import 'more_pages.dart' show showWriteSpent;
 
@@ -101,6 +100,15 @@ class _AccountsHomeState extends State<AccountsHome> {
   void _newGroup() => Navigator.of(context).push(sheetRoute(const GroupEditPage()));
   void _editGroup(String name) => Navigator.of(context).push(sheetRoute(GroupEditPage(name: name, color: _gc(name))));
 
+  /// إضافة حساب جديد داخل نفس المجموعة (يختار نوع الحساب ثم يُحفظ في المجموعة).
+  void _addToGroup(String g) => showPillMenu(context, [
+        ('Cash/Wallet Account', () => Navigator.of(context).push(sheetRoute(AccountEditPage(kind: 'cash', group: g)))),
+        ('Bank Account', () => Navigator.of(context).push(sheetRoute(AccountEditPage(kind: 'bank', group: g)))),
+        ('Credit Card', () => Navigator.of(context).push(sheetRoute(AccountEditPage(kind: 'credit', group: g)))),
+        ('Debit Card', () => Navigator.of(context).push(sheetRoute(AccountEditPage(kind: 'debit', group: g)))),
+        ('eWallet', () => Navigator.of(context).push(sheetRoute(AccountEditPage(kind: 'wallet', group: g)))),
+      ]);
+
   void _newAcc(String k) => Navigator.of(context).push(sheetRoute(AccountEditPage(kind: k)));
   void _editAcc(Account a) => Navigator.of(context).push(sheetRoute(AccountEditPage(edit: a)));
   void _openAcc(Account a) => Navigator.of(context).push(flowRoute(AccountTxPage(acc: a)));
@@ -121,69 +129,31 @@ class _AccountsHomeState extends State<AccountsHome> {
   Widget _avatar(Pal p) => Tap(
         onTap: () => showProfileSheet(context),
         child: Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(color: p.card, shape: BoxShape.circle, border: Border.all(color: p.line, width: 2)),
-          child: Icon(Icons.person_rounded, color: p.ink2, size: 26),
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(color: p.card, shape: BoxShape.circle, border: Border.all(color: p.line, width: 1.5)),
+          child: Icon(Icons.person_rounded, color: p.ink2, size: 22),
         ),
       );
 
-  /// جرس الإشعارات: عدّاد بالمعاملات (من الرسائل) اللي محتاجة تسجيل يدوي. بيفتح شاشة المراجعة.
-  Widget _bell(Pal p) => AnimatedBuilder(
-        animation: Listenable.merge([store, smsTracker]),
-        builder: (c, _) {
-          final n = smsTracker.review.length;
-          return Tap(
-            onTap: () => Navigator.of(context).push(flowRoute(const SmsReviewPage())),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Stack(clipBehavior: Clip.none, children: [
-                Icon(n > 0 ? Icons.notifications_rounded : Icons.notifications_none_rounded, size: 26, color: n > 0 ? kBlue : p.ink2),
-                if (n > 0)
-                  PositionedDirectional(
-                    top: -5,
-                    end: -6,
-                    child: Container(
-                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(color: kRed, borderRadius: BorderRadius.circular(9)),
-                      child: Center(child: Text(n > 99 ? '99+' : '$n', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700))),
-                    ),
-                  ),
-              ]),
-            ),
-          );
-        },
-      );
-
-  /// «ما الجديد»: أيقونة ✨ مسطّحة بجوار الجرس، بتعرض الإضافات الجديدة في التطبيق.
-  Widget _whatsNew(Pal p) => Tap(
-        onTap: () => showSheet<void>(context, (c) => SheetFrame(
-              title: 'ما الجديد',
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  for (final t in const ['شاشة اشتراكاتي الجديدة: دونات ونسب وتجربة مجانية وسجل دفعات', 'الجمعيات والأقساط', 'الحسابات المؤرشفة مع إمكانية الاسترجاع', 'شريط سفلي جديد وتبويبات معاملات ملوّنة'])
-                    Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Icon(Icons.auto_awesome_outlined, size: 18, color: kBlue), const SizedBox(width: 10), Expanded(child: Text(t, style: const TextStyle(fontSize: 15)))])),
-                ]),
-              ),
-            )),
-        child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.auto_awesome_outlined, size: 26, color: p.ink2)),
+  /// «اللي صرفته»: أيقونة دفتر وقلم زرقاء تفتح كتابة المصروفات النصية.
+  Widget _writeBtn(Pal p) => Tap(
+        onTap: () => showWriteSpent(context),
+        child: const Padding(padding: EdgeInsets.all(6), child: Icon(Icons.edit_note_rounded, size: 24, color: kBlue)),
       );
 
   Widget _toolbar(Pal p) => Glass(
-        radius: 30,
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        radius: 24,
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Padding(padding: const EdgeInsets.all(8), child: Icon(S.flag('hide') ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 26, color: p.ink2))),
-          const SizedBox(width: 10),
-          Tap(onTap: () => setState(() => edit = true), child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.tune_rounded, size: 26, color: p.ink2))),
-          const SizedBox(width: 10),
-          Tap(onTap: _addAccountMenu, child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.create_new_folder_outlined, size: 26, color: p.ink2))),
-          const SizedBox(width: 2),
-          _whatsNew(p),
-          _bell(p),
+          Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Padding(padding: const EdgeInsets.all(6), child: Icon(S.flag('hide') ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 21, color: p.ink2))),
+          const SizedBox(width: 4),
+          Tap(onTap: () => setState(() => edit = true), child: Padding(padding: const EdgeInsets.all(6), child: Icon(Icons.tune_rounded, size: 21, color: p.ink2))),
+          const SizedBox(width: 4),
+          Tap(onTap: _addAccountMenu, child: Padding(padding: const EdgeInsets.all(6), child: Icon(Icons.create_new_folder_outlined, size: 21, color: p.ink2))),
+          const SizedBox(width: 4),
+          _writeBtn(p),
         ]),
       );
 
@@ -192,7 +162,7 @@ class _AccountsHomeState extends State<AccountsHome> {
         builder: (c, o, _) {
           final t = ((o - 50) / 40).clamp(0.0, 1.0);
           return Container(
-            padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 6, 16, 6),
             decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [p.bg, p.bg.withValues(alpha: t > 0 ? .0 : 0)], stops: const [.7, 1])),
             child: Row(children: [
               _avatar(p),
@@ -204,7 +174,7 @@ class _AccountsHomeState extends State<AccountsHome> {
                 ),
               ),
               if (edit)
-                Tap(onTap: () => setState(() => edit = false), child: Container(height: 46, padding: const EdgeInsets.symmetric(horizontal: 24), alignment: Alignment.center, decoration: BoxDecoration(color: kBlue, borderRadius: BorderRadius.circular(23)), child: const Text('Done', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600))))
+                Tap(onTap: () => setState(() => edit = false), child: Container(height: 38, padding: const EdgeInsets.symmetric(horizontal: 20), alignment: Alignment.center, decoration: BoxDecoration(color: kBlue, borderRadius: BorderRadius.circular(19)), child: const Text('Done', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600))))
               else
                 _toolbar(p),
             ]),
@@ -212,82 +182,55 @@ class _AccountsHomeState extends State<AccountsHome> {
         },
       );
 
-  /// صافي الثروة + رسم اتجاه أرصدة الحسابات (آخر ٦ أشهر) + الأصول والالتزامات.
+  /// لوحة صافي الثروة / الالتزامات (الشكل القديم): أيقونة قبل كل اسم + شريط تقدم خفيف + صف «كل المعاملات».
   Widget _netCard(Pal p) {
     final liab = repo.liabilities;
-    final assets = repo.netWorth + liab;
-    final now = DateTime.now();
-    // رصيد الحسابات (المشمولة في صافي الثروة) في نهاية كل شهر؛ آخر نقطة = الرصيد الحالي.
-    final pts = <double>[
-      for (var i = 5; i >= 1; i--) repo.accList.where((a) => a.nw).fold(0.0, (s, a) => s + repo.balAt(a.id, DateTime(now.year, now.month - i + 1, 1))),
-      repo.accList.where((a) => a.nw).fold(0.0, (s, a) => s + repo.bal(a.id)),
-    ];
+    final net = repo.netWorth;
+    final assets = net + liab;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // ألوان البانل تتبع ثيم التطبيق (داكن/فاتح) بدل لون أزرق ثابت.
-    final panelA = isDark ? Color.lerp(p.card, p.acc, .10)! : p.card;
-    final panelB = isDark ? p.card : Color.lerp(p.card, p.bg, .6)!;
-    BoxDecoration glass(double r) => BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [panelA, panelB]),
-          borderRadius: BorderRadius.circular(r),
-          border: Border.all(color: p.line.withValues(alpha: isDark ? .6 : .9)),
-        );
-    final white = p.ink, dim = p.ink2;
-    Widget mini(String l, double v, Color c, IconData ic, double frac) => Expanded(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
-            decoration: glass(18),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Container(width: 26, height: 26, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(8)), child: Icon(ic, color: Colors.white, size: 15)),
-                const SizedBox(width: 8),
-                Text(l, style: TextStyle(fontSize: 12.5, color: c, fontWeight: FontWeight.w600)),
-              ]),
-              const SizedBox(height: 6),
-              Text(S.flag('hide') ? '••••' : egp(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: white)),
-              const SizedBox(height: 6),
-              ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: frac.clamp(0.0, 1.0), minHeight: 4, backgroundColor: p.ink.withValues(alpha: .08), valueColor: AlwaysStoppedAnimation(c))),
+    final hide = S.flag('hide');
+    final panelA = isDark ? Color.lerp(p.card, p.acc, .08)! : p.card;
+    Widget col(String l, IconData ic, double v, Color c, double frac) => Expanded(
+          child: Column(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(ic, size: 15, color: c),
+              const SizedBox(width: 5),
+              Text(l, style: TextStyle(fontSize: 12.5, color: c, fontWeight: FontWeight.w600, letterSpacing: .4)),
             ]),
-          ),
-        );
-    final total = assets + liab;
-    // نسبة التغيّر: آخر رصيد مقابل أول رصيد في رسم الاتجاه
-    final first = pts.first;
-    final chg = first.abs() < 1e-9 ? 0.0 : (pts.last - first) / first.abs() * 100;
-    final up = chg >= 0;
-    return Column(children: [
-      Container(
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
-        decoration: glass(22),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text('Net Worth', style: TextStyle(fontSize: 13, color: white)),
-            const SizedBox(width: 8),
-            Tap(onTap: () => S.put('hide', !S.flag('hide')), child: Icon(S.flag('hide') ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 18, color: dim)),
-            const Spacer(),
-            // شارة النسبة: أصغر ومرفوعة في سطر العنوان عشان ما تتداخلش مع خط التقدم
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(color: (up ? kGreen : kRed).withValues(alpha: .14), borderRadius: BorderRadius.circular(10), border: Border.all(color: (up ? kGreen : kRed).withValues(alpha: .4), width: .8)),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(up ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded, size: 11, color: up ? kGreen : kRed),
-                const SizedBox(width: 2),
-                Text('${chg.abs().toStringAsFixed(0)}%', textDirection: TextDirection.ltr, style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: up ? kGreen : kRed)),
-              ]),
+            const SizedBox(height: 6),
+            Text(hide ? '••••' : egp(v), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: p.ink)),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: ClipRRect(borderRadius: BorderRadius.circular(3), child: LinearProgressIndicator(value: frac.clamp(0.0, 1.0), minHeight: 3, backgroundColor: p.ink.withValues(alpha: .08), valueColor: AlwaysStoppedAnimation(c.withValues(alpha: .75)))),
             ),
           ]),
-          const SizedBox(height: 2),
-          Text(S.flag('hide') ? '••••••' : egp(repo.netWorth), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: white)),
-          const SizedBox(height: 4),
-          SizedBox(height: 38, width: double.infinity, child: CustomPaint(painter: _SparkPainter(pts, kGreen))),
+        );
+    final total = assets.abs() + liab.abs();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 14, 10, 4),
+      decoration: BoxDecoration(color: panelA, borderRadius: BorderRadius.circular(22), border: Border.all(color: p.line.withValues(alpha: isDark ? .6 : .9))),
+      child: Column(children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          col('NET WORTH', Icons.account_balance_wallet_outlined, net, kBlue, total > 0 ? assets.abs() / total : 0),
+          col('LIABILITIES', Icons.trending_down_rounded, liab, const Color(0xFFFF6B5E), total > 0 ? liab.abs() / total : 0),
         ]),
-      ),
-      const SizedBox(height: 8),
-      Row(children: [
-        mini('Assets', assets, const Color(0xFF3DA5FF), Icons.account_balance_wallet_rounded, total > 0 ? assets / total : 0),
-        const SizedBox(width: 10),
-        mini('Liabilities', liab, const Color(0xFFFF6B5E), Icons.arrow_downward_rounded, total > 0 ? liab / total : 0),
+        const SizedBox(height: 10),
+        Divider(color: p.line, height: 1),
+        Tap(
+          onTap: () => Navigator.of(context).push(flowRoute(const AccountTxPage())),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Row(children: [
+              Icon(Icons.history_rounded, size: 22, color: p.ink2),
+              const SizedBox(width: 12),
+              Expanded(child: Text('All Transactions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: p.ink))),
+              Icon(Icons.chevron_right_rounded, size: 22, color: p.ink2.withValues(alpha: .7)),
+            ]),
+          ),
+        ),
       ]),
-    ]);
+    );
   }
 
   Widget _pill(Pal p, String text, Color c) => Container(
@@ -331,8 +274,7 @@ class _AccountsHomeState extends State<AccountsHome> {
         key: ValueKey('${a.id}_$gen'),
         bg: p.bg,
         rightW: 290,
-        rightActions: Row(mainAxisSize: MainAxisSize.min, children: [
-          const SizedBox(width: 6),
+        rightActions: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           swipeCircle(Icons.edit_rounded, 'Edit', const Color(0xFF636366), () {
             setState(() => gen++);
             _editAcc(a);
@@ -349,12 +291,12 @@ class _AccountsHomeState extends State<AccountsHome> {
             }
             a.arch = true;
             repo.saveAccount(a);
-            toast(context, '"${a.name}" archived');
+            toast(context, 'تمت أرشفة "${a.name}"');
           }),
           swipeCircle(Icons.delete_outline_rounded, 'Delete', kRed, () => _delAcc(a)),
         ]),
         leftW: 150,
-        leftActions: Row(mainAxisSize: MainAxisSize.min, children: [
+        leftActions: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           swipeCircle(Icons.add_rounded, 'Income', const Color(0xFF28A745), () {
             setState(() => gen++);
             _addTx(a, 1);
@@ -380,7 +322,7 @@ class _AccountsHomeState extends State<AccountsHome> {
           }
           a.arch = true;
           repo.saveAccount(a);
-          toast(context, '"${a.name}" archived');
+          toast(context, '\"${a.name}\" archived');
         }, danger: true),
         AccMenuAction(Icons.delete_outline_rounded, 'Delete', () => _delAcc(a), danger: true),
       ]);
@@ -392,6 +334,7 @@ class _AccountsHomeState extends State<AccountsHome> {
       onTap: edit ? () => _editGroup(name) : () => _toggleFold(name, open),
       onLongPress: () => showPillMenu(context, [
         ('Edit group', () => _editGroup(name)),
+        ('إضافة حساب جديد', () => _addToGroup(name)),
         ('Delete group', () => _delGroup(name, l)),
       ]),
       child: Padding(
@@ -506,12 +449,11 @@ class _AccountsHomeState extends State<AccountsHome> {
         ),
         Positioned(top: 0, left: 0, right: 0, child: _topBar(p)),
         PositionedDirectional(
-          end: 18,
-          bottom: 96 + MediaQuery.of(context).padding.bottom,
+          end: 28,
+          bottom: 112 + MediaQuery.of(context).padding.bottom,
           child: Tap(
             scale: .92,
             onTap: () => Navigator.of(context).push(sheetRoute(const AddTxPage())),
-            onLongPress: () => showPillMenu(context, [('اكتب اللي صرفته', () => showWriteSpent(context))]),
             child: Container(
               width: 44,
               height: 44,

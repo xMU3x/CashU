@@ -18,9 +18,6 @@ dependencies:
   share_plus: ^10.1.4
   url_launcher: ^6.3.1
   image_picker: ^1.1.2
-  flutter_local_notifications: ^17.2.4
-  timezone: ^0.9.4
-  flutter_timezone: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -39,22 +36,22 @@ flutter:
   assets:
     - assets/brand/
   fonts:
-    # Plus Jakarta Sans (OFL) = الإنجليزي والأرقام · Readex Pro (OFL) = العربي. الربط المركزي: lib/ui/typography.dart
-    - family: PlusJakartaSans
+    # Inter (OFL) = أقرب بديل مفتوح الترخيص لـ SF Pro Text؛ SF Pro نفسه لا يجوز تضمينه في Android (ترخيص Apple).
+    - family: Inter
       fonts:
-        - asset: assets/fonts/PlusJakartaSans-400.ttf
-        - asset: assets/fonts/PlusJakartaSans-500.ttf
+        - asset: assets/fonts/Inter-400.ttf
+        - asset: assets/fonts/Inter-500.ttf
           weight: 500
-        - asset: assets/fonts/PlusJakartaSans-600.ttf
+        - asset: assets/fonts/Inter-600.ttf
           weight: 600
-        - asset: assets/fonts/PlusJakartaSans-700.ttf
+        - asset: assets/fonts/Inter-700.ttf
           weight: 700
-    - family: ReadexPro
+    - family: NotoSansArabic
       fonts:
-        - asset: assets/fonts/ReadexPro-400.ttf
-        - asset: assets/fonts/ReadexPro-500.ttf
+        - asset: assets/fonts/NotoSansArabic-400.ttf
+        - asset: assets/fonts/NotoSansArabic-500.ttf
           weight: 500
-        - asset: assets/fonts/ReadexPro-600.ttf
+        - asset: assets/fonts/NotoSansArabic-600.ttf
           weight: 600
-        - asset: assets/fonts/ReadexPro-700.ttf
+        - asset: assets/fonts/NotoSansArabic-700.ttf
           weight: 700

@@ -7,7 +7,6 @@ import sys
 app = pathlib.Path("android/app")
 kts, groovy = app / "build.gradle.kts", app / "build.gradle"
 DESUGAR = "2.1.4"
-APP_ID = "com.cashu.cashu"
 
 if kts.exists():
     f = kts
@@ -37,14 +36,6 @@ if "isMinifyEnabled" not in s and "minifyEnabled" not in s:
     else:
         s = re.sub(r"(buildTypes\s*\{\s*release\s*\{)", r"\1\n            minifyEnabled false\n            shrinkResources false", s, count=1)
 
-# تثبيت معرّف التطبيق والـ namespace صراحةً (com.cashu.cashu) حتى لو تغيّر قالب flutter create
-if f.suffix == ".kts":
-    s = re.sub(r'namespace\s*=\s*"[^"]*"', f'namespace = "{APP_ID}"', s)
-    s = re.sub(r'applicationId\s*=\s*"[^"]*"', f'applicationId = "{APP_ID}"', s)
-else:
-    s = re.sub(r'namespace\s*=?\s*["\'][^"\']*["\']', f'namespace "{APP_ID}"', s)
-    s = re.sub(r'applicationId\s*=?\s*["\'][^"\']*["\']', f'applicationId "{APP_ID}"', s)
-
 f.write_text(s, encoding="utf8")
 
-print(f"patched {f} (desugaring + applicationId/namespace = {APP_ID})")
+print(f"patched {f} (desugaring)")

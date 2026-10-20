@@ -41,28 +41,30 @@ DateTime nextCycle(DateTime d, String c) {
 class SubPay {
   int ts;
   double amt;
-  SubPay(this.ts, this.amt);
-  Map<String, dynamic> toJson() => {'ts': ts, 'amt': amt};
+  String acc; // الحساب اللي اتسحبت منه الدفعة (فاضي = الحساب الافتراضي للاشتراك)
+  SubPay(this.ts, this.amt, [this.acc = '']);
+  Map<String, dynamic> toJson() => {'ts': ts, 'amt': amt, if (acc.isNotEmpty) 'acc': acc};
 }
 
 /// state: active | paused | stopped
 class Sub {
-  String id, name, cyc, acc, note, state, svc;
+  String id, name, cyc, acc, note, state, svc, img; // img: صورة مخصّصة (data-URI) أو رابط
   double amt;
-  int first, until, trialEnd, remind, u;
+  int first, until, trialEnd, remind, u, colorV; // colorV: لون مخصّص ARGB (0 = تلقائي حسب الخدمة)
   bool trial, auto, budget, del;
   List<SubPay> pays;
-  Sub({required this.id, required this.name, required this.amt, this.cyc = 'month', this.svc = '', this.acc = '', this.note = '', this.state = 'active', required this.first, this.until = 0, this.trial = false, this.trialEnd = 0, this.remind = 2, this.auto = false, this.budget = true, this.del = false, this.u = 0, List<SubPay>? pays}) : pays = pays ?? [];
+  Sub({required this.id, required this.name, required this.amt, this.cyc = 'month', this.svc = '', this.acc = '', this.note = '', this.state = 'active', required this.first, this.until = 0, this.trial = false, this.trialEnd = 0, this.remind = 2, this.auto = false, this.budget = true, this.del = false, this.u = 0, this.img = '', this.colorV = 0, List<SubPay>? pays}) : pays = pays ?? [];
 
   factory Sub.fromJson(Map<String, dynamic> j) => Sub(
         id: _ss(j['id']), name: _ss(j['name']), amt: _dd(j['amt']), cyc: _ss(j['cyc'], 'month'), svc: _ss(j['svc']), acc: _ss(j['acc']), note: _ss(j['note']),
         state: _ss(j['state'], 'active'), first: _ii(j['first']), until: _ii(j['until']), trialEnd: _ii(j['trialEnd']), remind: _ii(j['remind'], 2),
         trial: _bb(j['trial']), auto: _bb(j['auto']), budget: _bb(j['budget'], true), del: _bb(j['del']), u: _ii(j['u']),
-        pays: [for (final x in (j['pays'] is List ? j['pays'] as List : const [])) if (x is Map) SubPay(_ii(x['ts']), _dd(x['amt']))],
+        img: _ss(j['img']), colorV: _ii(j['colorV']),
+        pays: [for (final x in (j['pays'] is List ? j['pays'] as List : const [])) if (x is Map) SubPay(_ii(x['ts']), _dd(x['amt']), _ss(x['acc']))],
       );
   Map<String, dynamic> toJson() => {
         'id': id, 'name': name, 'amt': amt, 'cyc': cyc, 'svc': svc, 'acc': acc, 'note': note, 'state': state, 'first': first, 'until': until,
-        'trialEnd': trialEnd, 'remind': remind, 'trial': trial, 'auto': auto, 'budget': budget, 'del': del, 'u': u, 'pays': [for (final x in pays) x.toJson()],
+        'trialEnd': trialEnd, 'remind': remind, 'trial': trial, 'auto': auto, 'budget': budget, 'del': del, 'u': u, 'img': img, 'colorV': colorV, 'pays': [for (final x in pays) x.toJson()],
       };
 
   DateTime get firstDate => DateTime.fromMillisecondsSinceEpoch(first);
@@ -163,7 +165,7 @@ class Extras extends ChangeNotifier {
   void init() {
     load();
     store.changes.listen((k) {
-      if (k == 'cashu_sub' || k == 'cashu_assoc' || k == 'cashu_inst') {
+      if (k == 'tyr_sub' || k == 'tyr_assoc' || k == 'tyr_inst') {
         load();
         notifyListeners();
       }
@@ -179,9 +181,9 @@ class Extras extends ChangeNotifier {
       return o;
     }
 
-    _sub = rd('cashu_sub', Sub.fromJson);
-    _assoc = rd('cashu_assoc', Assoc.fromJson);
-    _inst = rd('cashu_inst', Inst.fromJson);
+    _sub = rd('tyr_sub', Sub.fromJson);
+    _assoc = rd('tyr_assoc', Assoc.fromJson);
+    _inst = rd('tyr_inst', Inst.fromJson);
   }
 
   void _put(String k, String id, Map<String, dynamic> j) {
@@ -196,7 +198,7 @@ class Extras extends ChangeNotifier {
   List<Sub> get subs => (_sub.values.where((s) => !s.del).toList()..sort((a, b) => a.name.compareTo(b.name)));
   void saveSub(Sub s) {
     s.u = _nowMs();
-    _put('cashu_sub', s.id, s.toJson());
+    _put('tyr_sub', s.id, s.toJson());
   }
 
   void delSub(Sub s) {
@@ -205,14 +207,15 @@ class Extras extends ChangeNotifier {
   }
 
   /// تسجيل دفعة اشتراك: تُضاف لسجل الدفعات، ولو «احسبها من الميزانية» تتسجل مصروف تحت «ترفيه › اشتراكات».
-  void paySub(Sub s, {int? ts, double? amt}) {
+  void paySub(Sub s, {int? ts, double? amt, String? acc}) {
     final t = ts ?? _nowMs();
     final a = amt ?? s.amt;
     if (s.pays.any((p) => p.ts == t)) return;
-    s.pays.add(SubPay(t, a));
+    final from = (acc != null && acc.isNotEmpty) ? acc : (s.acc.isEmpty ? repo.defaultAcc : s.acc);
+    s.pays.add(SubPay(t, a, from));
     s.pays.sort((x, y) => y.ts.compareTo(x.ts));
     if (s.budget) {
-      repo.saveTx(Tx(id: 'sub_${s.id}_$t', type: 'exp', amt: a, acc: s.acc.isEmpty ? repo.defaultAcc : s.acc, cat: 'fun', sub: 'اشتراكات', note: s.name, ts: t, src: 'sub:${s.id}'));
+      repo.saveTx(Tx(id: 'sub_${s.id}_$t', type: 'exp', amt: a, acc: from, cat: 'fun', sub: 'اشتراكات', note: s.name, ts: t, src: 'sub:${s.id}'));
     }
     saveSub(s);
   }
@@ -239,7 +242,7 @@ class Extras extends ChangeNotifier {
   List<Assoc> get assocs => (_assoc.values.where((a) => !a.del).toList()..sort((a, b) => a.name.compareTo(b.name)));
   void saveAssoc(Assoc a) {
     a.u = _nowMs();
-    _put('cashu_assoc', a.id, a.toJson());
+    _put('tyr_assoc', a.id, a.toJson());
   }
 
   void delAssoc(Assoc a) {
@@ -265,7 +268,7 @@ class Extras extends ChangeNotifier {
   List<Inst> get insts => (_inst.values.where((a) => !a.del).toList()..sort((a, b) => a.name.compareTo(b.name)));
   void saveInst(Inst i) {
     i.u = _nowMs();
-    _put('cashu_inst', i.id, i.toJson());
+    _put('tyr_inst', i.id, i.toJson());
   }
 
   void delInst(Inst i) {

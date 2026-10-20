@@ -193,7 +193,7 @@ class FormRow extends StatelessWidget {
           const Spacer(),
           if (value != null) Flexible(child: Text(value!, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15.5, color: valueColor ?? p.ink))),
           if (trailing != null) trailing!,
-          if (chevron) Padding(padding: const EdgeInsetsDirectional.only(start: 4), child: Icon(isAr ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22)),
+          if (chevron) Padding(padding: const EdgeInsetsDirectional.only(start: 4), child: Icon(Icons.chevron_right_rounded, color: p.ink2.withValues(alpha: .7), size: 22)),
         ]),
       ),
     );
@@ -269,11 +269,14 @@ const Map<String, (IconData, Color)> _kCatIcons = {
 
 
 // ---------- سحب أفقي يكشف أزرارًا ----------
+/// الاتجاه منطقي (يتبع RTL/LTR): [rightActions] = أزرار جهة البداية، تظهر بسحب الصف ناحية النهاية.
+/// [leftActions] = أزرار جهة النهاية، تظهر بسحب الصف ناحية البداية.
+/// عند السحب لآخر مدى تتباعد الأيقونات (stretch) وتتدور زوايا الصف بدل الحواف الحادة.
 class SwipeRow extends StatefulWidget {
   final Widget child;
-  final Widget? rightActions; // تظهر عند السحب لليمين (على الشمال)
+  final Widget? rightActions; // جهة البداية
   final double rightW;
-  final Widget? leftActions; // تظهر عند السحب لليسار (على اليمين)
+  final Widget? leftActions; // جهة النهاية
   final double leftW;
   final Color bg;
   const SwipeRow({super.key, required this.child, this.rightActions, this.rightW = 0, this.leftActions, this.leftW = 0, this.bg = Colors.black});
@@ -282,7 +285,7 @@ class SwipeRow extends StatefulWidget {
 }
 
 class SwipeRowState extends State<SwipeRow> {
-  double dx = 0;
+  double dx = 0; // منطقي: > 0 = الصف مسحوب ناحية النهاية (يكشف أزرار البداية)
   bool drag = false;
   bool _armed = false;
 
@@ -290,16 +293,17 @@ class SwipeRowState extends State<SwipeRow> {
 
   double get _maxR => widget.rightW;
   double get _maxL => widget.leftW;
+  double get _s => Directionality.of(context) == TextDirection.rtl ? -1.0 : 1.0;
 
   /// مقاومة مطاطية بعد نهاية الأزرار بدل التوقف الحاد.
   double _resist(double raw) {
-    if (raw > _maxR) return _maxR + (raw - _maxR) * .25;
-    if (raw < -_maxL) return -_maxL + (raw + _maxL) * .25;
+    if (raw > _maxR) return _maxR + (raw - _maxR) * .6;
+    if (raw < -_maxL) return -_maxL + (raw + _maxL) * .6;
     return raw;
   }
 
   void _end(DragEndDetails d) {
-    final v = d.primaryVelocity ?? 0;
+    final v = (d.primaryVelocity ?? 0) * _s;
     double t = 0;
     if (dx > 0 && _maxR > 0 && (dx > _maxR * .4 || v > 700)) t = _maxR;
     if (dx < 0 && _maxL > 0 && (-dx > _maxL * .4 || v < -700)) t = -_maxL;
@@ -315,12 +319,17 @@ class SwipeRowState extends State<SwipeRow> {
     final pr = _maxR > 0 ? (dx / _maxR).clamp(0.0, 1.0) : 0.0;
     final pl = _maxL > 0 ? (-dx / _maxL).clamp(0.0, 1.0) : 0.0;
     Widget reveal(double t, Widget w) => Opacity(opacity: Curves.easeOut.transform(t), child: Transform.scale(scale: .82 + .18 * Curves.easeOutBack.transform(t), child: w));
+    final stretchR = dx > _maxR ? dx : _maxR;
+    final stretchL = -dx > _maxL ? -dx : _maxL;
+    // زوايا مدوّرة طالما الصف مسحوب (بدل الحواف الحادة)
+    final rad = (dx.abs() / 24).clamp(0.0, 1.0) * 22;
     return ClipRect(
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onHorizontalDragStart: (_) => setState(() => drag = true),
         onHorizontalDragUpdate: (d) {
-          final nx = _resist(dx + d.delta.dx * (dx.abs() > (dx > 0 ? _maxR : _maxL) ? .5 : 1));
+          final step = d.delta.dx * _s;
+          final nx = _resist(dx + step * (dx.abs() > (dx > 0 ? _maxR : _maxL) ? .7 : 1));
           final armed = (nx > 0 && _maxR > 0 && nx > _maxR * .4) || (nx < 0 && _maxL > 0 && -nx > _maxL * .4);
           if (armed && !_armed) tick();
           setState(() {
@@ -334,8 +343,8 @@ class SwipeRowState extends State<SwipeRow> {
             child: Container(
               color: widget.bg,
               child: Stack(children: [
-                if (widget.rightActions != null) Positioned(left: 0, top: 0, bottom: 0, width: widget.rightW, child: Center(child: reveal(pr, widget.rightActions!))),
-                if (widget.leftActions != null) Positioned(right: 0, top: 0, bottom: 0, width: widget.leftW, child: Center(child: reveal(pl, widget.leftActions!))),
+                if (widget.rightActions != null) PositionedDirectional(start: 0, top: 0, bottom: 0, width: stretchR, child: Center(child: reveal(pr, widget.rightActions!))),
+                if (widget.leftActions != null) PositionedDirectional(end: 0, top: 0, bottom: 0, width: stretchL, child: Center(child: reveal(pl, widget.leftActions!))),
               ]),
             ),
           ),
@@ -343,7 +352,7 @@ class SwipeRowState extends State<SwipeRow> {
             tween: Tween<double>(end: dx),
             duration: Duration(milliseconds: drag ? 0 : 380),
             curve: const Cubic(.2, .9, .25, 1),
-            builder: (c, v, ch) => Transform.translate(offset: Offset(v, 0), child: ch),
+            builder: (c, v, ch) => Transform.translate(offset: Offset(v * _s, 0), child: ClipRRect(borderRadius: BorderRadius.circular(v.abs() > 0.5 ? rad : 0), child: ch)),
             child: widget.child,
           ),
         ]),
@@ -434,18 +443,9 @@ Future<void> showPopMenu(BuildContext context, List<PopItem> items) {
 }
 
 Future<bool> confirmDialog(BuildContext context, String title, String msg, {String ok = 'Delete'}) async =>
-    await showGeneralDialog<bool>(
+    await showDialog<bool>(
       context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Close',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
-      // M3: تلاشي + تكبير من 90% بمنحنى emphasized
-      transitionBuilder: (_, a, __, child) {
-        final k = CurvedAnimation(parent: a, curve: const Cubic(.3, 0, 0, 1), reverseCurve: Curves.easeInCubic);
-        return FadeTransition(opacity: k, child: ScaleTransition(scale: Tween<double>(begin: .9, end: 1).animate(k), child: child));
-      },
-      pageBuilder: (c, _, __) => AlertDialog(
+      builder: (c) => AlertDialog(
         title: Text(title, style: const TextStyle(fontSize: 18)),
         content: Text(msg),
         actions: [

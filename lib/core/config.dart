@@ -32,10 +32,10 @@ bool keyLooksValid(String k) {
   return false;
 }
 
-const String kNativeRedirect = 'com.cashu.cashu://auth';
-const String kStorePrefix = 'cashu:';
+const String kNativeRedirect = 'com.werd.cashu://auth';
+const String kStorePrefix = 'tyr:';
 
 /// مفاتيح داخل جدول cash_sync (key text).
 const List<String> kSyncKeys = [
-  'cashu_acc', 'cashu_bud', 'cashu_tx', 'cashu_loan', 'cashu_goal', 'cashu_cat', 'cashu_ctg', 'cashu_set', 'cashu_sub', 'cashu_assoc', 'cashu_inst',
+  'tyr_acc', 'tyr_bud', 'tyr_tx', 'tyr_loan', 'tyr_goal', 'tyr_cat', 'tyr_ctg', 'tyr_set', 'tyr_sub', 'tyr_assoc', 'tyr_inst',
 ];

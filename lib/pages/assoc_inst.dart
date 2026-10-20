@@ -36,7 +36,7 @@ Widget _field(Pal p, IconData ic, String hint, String value, VoidCallback f) => 
 Widget _addBtn(Pal p, VoidCallback f) => PositionedDirectional(
       end: 20,
       bottom: 28,
-      child: FabIn(child: Tap(onTap: f, child: Container(width: 64, height: 64, decoration: BoxDecoration(color: p.ink, borderRadius: BorderRadius.circular(22)), child: Icon(Icons.add_rounded, color: p.bg, size: 30)))),
+      child: Tap(onTap: f, child: Container(width: 64, height: 64, decoration: BoxDecoration(color: p.ink, borderRadius: BorderRadius.circular(22)), child: Icon(Icons.add_rounded, color: p.bg, size: 30))),
     );
 
 Widget _row(Pal p, IconData ic, Color c, String t, String sub, String trail, VoidCallback f) => Tap(

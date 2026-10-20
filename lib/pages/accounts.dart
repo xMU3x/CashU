@@ -136,7 +136,7 @@ class _AccountsState extends State<AccountsPage> {
               Icon(i, color: p.ink2),
               const SizedBox(width: 16),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(t, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600)), if (s != null) Text(s, style: TextStyle(color: p.ink2, fontSize: 15))])),
-              Icon(Icons.chevron_left_rounded, color: p.ink2),
+              Icon(Icons.chevron_right_rounded, color: p.ink2),
             ]),
           ),
         ),

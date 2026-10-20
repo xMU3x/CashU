@@ -62,9 +62,9 @@ class _StatsState extends State<StatsPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               child: Row(children: [
-                RoundBtn(Icons.chevron_right_rounded, () => _go(back + 1), size: 48),
+                RoundBtn(Icons.chevron_left_rounded, () => _go(back + 1), size: 48),
                 Expanded(child: Center(child: AnimatedSwitcher(duration: const Duration(milliseconds: 300), transitionBuilder: (w, a) => FadeTransition(opacity: a, child: ScaleTransition(scale: Tween<double>(begin: .9, end: 1).animate(a), child: w)), child: Text('${kMonths[m.month - 1]} ${toAr('${m.year}')}', key: ValueKey(back), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700))))),
-                Opacity(opacity: back == 0 ? .35 : 1, child: RoundBtn(Icons.chevron_left_rounded, back == 0 ? null : () => _go(back - 1), size: 48)),
+                Opacity(opacity: back == 0 ? .35 : 1, child: RoundBtn(Icons.chevron_right_rounded, back == 0 ? null : () => _go(back - 1), size: 48)),
               ]),
             ),
             Expanded(

@@ -30,6 +30,16 @@ const Map<String, String> _en2ar = {
   'Settings': 'الإعدادات', 'Share Transaction': 'مشاركة المعاملة', 'Show All': 'عرض الكل', 'Split': 'تقسيم', 'Stop': 'إيقاف',
   'Transfer amount': 'مبلغ التحويل', 'Upload': 'رفع', 'Upload Image': 'رفع صورة', 'Does not repeat': 'لا يتكرر', 'NET WORTH': 'صافي الثروة',
   'LIABILITIES': 'الالتزامات', 'Basic': 'أساسي', 'Advanced': 'متقدم', 'Search ': 'بحث ', 'Not signed in': 'غير مسجّل', 'Add': 'إضافة',
+  'New Group': 'مجموعة جديدة', 'Edit group': 'تعديل المجموعة', 'Edit Group': 'تعديل المجموعة', 'Loan': 'سلفة', 'Balance Adjustment': 'تسوية الرصيد', 'Repeat…': 'تكرار…', 'Repeat': 'تكرار', 'Tags': 'الوسوم',
+  'Due date': 'تاريخ الاستحقاق', 'Set as Cleared': 'تعيين كمُسوّاة', 'Set as Pending': 'تعيين كمعلّقة', 'Select transactions first': 'اختر المعاملات أولًا',
+  'Change Category': 'تغيير التصنيف', 'Change Account': 'تغيير الحساب', 'No matching transactions': 'لا معاملات مطابقة', 'Duplicate Selected': 'تكرار المحدد', 'Delete Selected': 'حذف المحدد',
+  'Newest first': 'الأحدث أولًا', 'Oldest first': 'الأقدم أولًا', 'Amount: high to low': 'المبلغ: من الأعلى للأقل', 'Amount: low to high': 'المبلغ: من الأقل للأعلى', 'Export failed': 'فشل التصدير',
+  'Hide search bar': 'إخفاء شريط البحث', 'Show search bar': 'إظهار شريط البحث', 'Use list view': 'عرض كقائمة', 'Use table view': 'عرض كجدول', 'Filters & Sort': 'التصفية والترتيب',
+  'List View': 'عرض القائمة', 'Table View': 'عرض الجدول', 'Bulk edit': 'تعديل جماعي', 'Export CSV': 'تصدير CSV', 'Customize Toolbar': 'تخصيص الشريط',
+  'Enter a group name': 'اكتب اسم المجموعة', 'A group with this name already exists': 'توجد مجموعة بنفس الاسم', 'Move the following accounts into the group:': 'انقل الحسابات التالية إلى المجموعة:',
+  'Enter the web address of any image with JPG or PNG extension and the app will attempt to download it.': 'اكتب رابط أي صورة بصيغة JPG أو PNG وسيحاول التطبيق تحميلها.',
+  'Enter the real balance of the account. The difference is saved as a \"New balance\" entry.': 'اكتب الرصيد الفعلي للحساب، ويُحفظ الفرق كمدخل «رصيد جديد».',
+  'Date & time ': 'التاريخ والوقت', 'Last 4': 'آخر ٤ أرقام', 'Sub-category': 'تصنيف فرعي', 'Select Category ': 'اختر التصنيف', 'Edit Transaction': 'تعديل المعاملة', 'Edit Expense': 'تعديل مصروف', 'Edit Income': 'تعديل دخل', 'Edit Transfer': 'تعديل تحويل',
   'Downloading image...': 'جارٍ تحميل الصورة...', 'Could not download the image. The link will be used directly.': 'تعذّر تحميل الصورة، سيتم استخدام الرابط مباشرة.',
   'Opening Balance': 'الرصيد الافتتاحي', 'Last 4 digits': 'آخر ٤ أرقام', 'Account number': 'رقم الحساب (آخر ٤ أرقام)', 'Adjust': 'تسوية', 'Today': 'اليوم', 'Yesterday': 'أمس', 'New transaction': 'معاملة جديدة', 'Image from gallery': 'صورة من المعرض', 'Image from URL': 'صورة من رابط',
   "Icon from bank's website": 'أيقونة من موقع البنك', 'Bank icons': 'أيقونات البنوك', 'Budget monitoring': 'متابعة الميزانية',
@@ -53,6 +63,20 @@ final List<(RegExp, String)> _rules = [
   (RegExp(r'^"(.+)" will be deleted\. Its transactions stay in the history\.$'), r'سيتم حذف "$1". تبقى معاملاته في السجل.'),
   (RegExp(r'^Delete "(.+)" and its (\d+) account\(s\)\?$'), r'حذف "$1" وحساباته ($2)؟'),
   (RegExp(r'^(\d+) repeating transactions?$'), r'$1 معاملة متكررة'),
+  (RegExp(r'^Transfer (.+) ▶ (.+)$'), r'تحويل $1 ← $2'),
+  (RegExp(r'^Transfer from (.+)$'), r'تحويل من $1'),
+  (RegExp(r'^Transfer to (.+)$'), r'تحويل إلى $1'),
+  (RegExp(r'^Refund of (.+)$'), r'استرداد: $1'),
+  (RegExp(r'^Add a pending refund of (.+) for "(.+)"\?$'), r'إضافة استرداد معلّق بقيمة $1 عن "$2"؟'),
+  (RegExp(r'^Updated (\d+)$'), r'تم تحديث $1'),
+  (RegExp(r'^Deleted (\d+)$'), r'تم حذف $1'),
+  (RegExp(r'^Delete (\d+) transaction\(s\)\?$'), r'حذف $1 معاملة؟'),
+  (RegExp(r'^Balance: (.+)$'), r'الرصيد: $1'),
+  (RegExp(r'^Repeat: (.+)$'), r'التكرار: $1'),
+  (RegExp(r'^New sub-category for (.+)$'), r'تصنيف فرعي جديد لـ $1'),
+  (RegExp(r'^Difference: (.+)$'), r'الفرق: $1'),
+  (RegExp(r'^Opening balance \((.+)\)$'), r'الرصيد الافتتاحي ($1)'),
+  (RegExp(r'^Edit (.+)$'), r'تعديل $1'),
 ];
 
 /// يترجم نصًا واجهيًا حسب اللغة الحالية. النص غير الموجود في القاموس يُعرض كما هو.
@@ -63,7 +87,7 @@ String tl(String s) {
   if (s.isEmpty || !RegExp(r'[A-Za-z]').hasMatch(s)) return s;
   for (final r in _rules) {
     final m = r.$1.firstMatch(s);
-    if (m != null) { return r.$2.replaceAllMapped(RegExp(r'\$(\d)'), (g) => m.group(int.parse(g.group(1)!)) ?? ''); }
+    if (m != null) { return r.$2.replaceAllMapped(RegExp(r'\$(\d)'), (g) => tl(m.group(int.parse(g.group(1)!)) ?? '')); }
   }
   return s;
 }

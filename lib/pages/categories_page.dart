@@ -92,7 +92,7 @@ class _CategoriesState extends State<CategoriesPage> {
                     ? null
                     : Tap(
                         onTap: () => setState(() => isOpen ? open.remove(d.id) : open.add(d.id)),
-                        child: AnimatedRotation(turns: isOpen ? .25 : (Directionality.of(context) == TextDirection.rtl ? .5 : 0), duration: const Duration(milliseconds: 220), child: Icon(Icons.chevron_right_rounded, color: p.ink2)),
+                        child: AnimatedRotation(turns: isOpen ? (Directionality.of(context) == TextDirection.rtl ? -.25 : .25) : 0, duration: const Duration(milliseconds: 220), child: Icon(Icons.chevron_right_rounded, color: p.ink2)),
                       ),
               ),
             ] else

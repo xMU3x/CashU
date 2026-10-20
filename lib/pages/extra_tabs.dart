@@ -17,7 +17,7 @@ Widget _bigTitle(String t, String sub, Pal p, {VoidCallback? back}) => Padding(
         decoration: iosCard(p, r: 22),
         child: Row(children: [
           if (back != null) ...[
-            Tap(onTap: back, child: Container(width: 40, height: 40, decoration: BoxDecoration(color: p.field, shape: BoxShape.circle), child: Icon(isAr ? Icons.chevron_right_rounded : Icons.chevron_left_rounded, color: p.ink))),
+            Tap(onTap: back, child: Container(width: 40, height: 40, decoration: BoxDecoration(color: p.field, shape: BoxShape.circle), child: Icon(Icons.chevron_left_rounded, color: p.ink))),
             const SizedBox(width: 12),
           ],
           Expanded(
@@ -72,7 +72,7 @@ class BudgetsTab extends StatelessWidget {
                     const SizedBox(height: 14),
                     ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: frac, minHeight: 8, backgroundColor: p.field, valueColor: AlwaysStoppedAnimation(over ? kRed : (frac > .8 ? kOrange : kBlue)))),
                     const SizedBox(height: 8),
-                    Text('Spent ${egp(spent)}${b.limit > 0 ? ' of ${egp(b.limit)}' : ' · tap to set a monthly limit'}', style: TextStyle(fontSize: 13, color: p.ink2)),
+                    Text('المصروف ${egp(spent)}${b.limit > 0 ? ' من ${egp(b.limit)}' : ' · اضغط لتحديد حد شهري'}', style: TextStyle(fontSize: 13, color: p.ink2)),
                   ]),
                 ),
               ),

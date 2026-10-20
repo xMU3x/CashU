@@ -238,7 +238,7 @@ Future<String?> showPickAccount(BuildContext context, String sel, {String title 
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(color: a.id == sel ? p.line : p.field, borderRadius: BorderRadius.circular(22)),
                     child: Row(children: [
-                      bankIcon(a.kind),
+                      accIcon(a, size: 44),
                       const SizedBox(width: 14),
                       Expanded(child: Text(a.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
                       Text(money(repo.bal(a.id)), style: TextStyle(color: p.ink2)),
@@ -379,7 +379,7 @@ class _CatPickerState extends State<_CatPicker> {
             const SizedBox(width: 14),
             Expanded(child: Text(k.name, style: TextStyle(fontSize: 17, fontWeight: k.id == widget.sel ? FontWeight.w700 : FontWeight.w500))),
             if (k.id == widget.sel && widget.selSub.isEmpty) const Padding(padding: EdgeInsetsDirectional.only(end: 8), child: Icon(Icons.check_rounded, color: kBlue, size: 20)),
-            if (subs.isNotEmpty) AnimatedRotation(turns: isOpen ? .25 : (isAr ? .5 : 0), duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, child: Icon(Icons.chevron_right_rounded, color: p.ink2)),
+            if (subs.isNotEmpty) AnimatedRotation(turns: isOpen ? (isAr ? -.25 : .25) : 0, duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, child: Icon(Icons.chevron_right_rounded, color: p.ink2)),
           ]),
         ),
       ));

@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart' hide Text;
 import 'ui/loc_text.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'core/nav.dart';
-import 'core/notify.dart';
 import 'core/repo.dart';
 import 'core/settings.dart';
 import 'core/store.dart';
@@ -17,11 +14,10 @@ import 'pages/accounts_home.dart';
 import 'pages/subs_page.dart';
 import 'core/extras.dart';
 import 'pages/more_tab.dart';
-import 'pages/assoc_inst.dart';
-import 'pages/sms_pages.dart' show SmsReviewPage;
+import 'pages/nav_items.dart';
+import 'ui/widgets.dart' show flowRoute;
 import 'ui/anim.dart';
 import 'ui/ios.dart';
-import 'ui/widgets.dart' show flowRoute;
 import 'ui/theme.dart';
 
 class CashUApp extends StatelessWidget {
@@ -34,23 +30,12 @@ class CashUApp extends StatelessWidget {
           final pal = Pal.make(dark, kBlue);
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            navigatorKey: navKey,
             title: 'CashU',
             locale: Locale(isAr ? 'ar' : 'en'),
             supportedLocales: const [Locale('ar'), Locale('en')],
             localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
             theme: buildTheme(pal, dark),
-            // شريطا النظام شفافان (edge-to-edge) وألوان الأيقونات تتبع الثيم الفاتح/الداكن.
-            builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                systemNavigationBarColor: Colors.transparent,
-                systemNavigationBarContrastEnforced: false,
-                statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
-                systemNavigationBarIconBrightness: dark ? Brightness.light : Brightness.dark,
-              ),
-              child: Directionality(textDirection: isAr ? TextDirection.rtl : TextDirection.ltr, child: UiScale(child: child ?? const SizedBox.shrink())),
-            ),
+            builder: (context, child) => Directionality(textDirection: isAr ? TextDirection.rtl : TextDirection.ltr, child: UiScale(child: child ?? const SizedBox.shrink())),
             home: const Shell(),
           );
         },
@@ -64,13 +49,13 @@ class Shell extends StatefulWidget {
 }
 
 class _ShellState extends State<Shell> with WidgetsBindingObserver {
+  int tab = 0;
   Timer? _smsTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    notifier.onOpen = openRoute;
     _smsTimer = Timer.periodic(const Duration(seconds: 20), (_) {
       if (smsTracker.enabled) smsTracker.drainNative();
     });
@@ -91,198 +76,84 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
       repo.runRecurring();
       extras.runAuto();
       smsTracker.drainNative();
-      notifier.scheduleSoon();
     }
   }
 
   void _go(int i) {
-    if (i == tabIndex.value) return;
+    if (i == tab) return;
     tick();
-    tabIndex.value = i;
-    navKey.currentState?.popUntil((r) => r.isFirst);
+    setState(() => tab = i);
   }
 
-  Widget _item(int sel, int i, IconData ic, String label) => Expanded(child: _NavItem(icon: ic, label: label, selected: sel == i, onTap: () => _go(i)));
+  /// عنصر الشريط: الأيقونة فقط، والاسم يظهر تحت العنصر المختار فقط.
+  Widget _item(NavItem n, int cur) {
+    final on = n.tab != null && cur == n.tab;
+    final p = Pal.of(context);
+    final c = on ? kBlue : p.ink2;
+    return Expanded(
+      flex: on ? 2 : 1,
+      child: Tap(
+        scale: .95,
+        onTap: () {
+          if (n.tab != null) {
+            _go(n.tab!);
+          } else {
+            tick();
+            Navigator.of(context).push(flowRoute(n.page!()));
+          }
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+          margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+          decoration: BoxDecoration(color: on ? p.field : Colors.transparent, borderRadius: BorderRadius.circular(28)),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(n.icon, color: c, size: on ? 24 : 27),
+            if (on) ...[
+              const SizedBox(height: 2),
+              Text(n.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: c, fontSize: 11.5, fontWeight: FontWeight.w600)),
+            ],
+          ]),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = Pal.of(context);
     final bottom = MediaQuery.of(context).padding.bottom;
-    return Scaffold(
-      backgroundColor: p.bg,
-      body: Stack(children: [
-        const _TabHost(),
-        Positioned(
-          left: 14,
-          right: 14,
-          bottom: 10 + bottom,
-          child: RepaintBoundary(
+    return AnimatedBuilder(animation: store, builder: (c, _) {
+      final items = currentNavItems();
+      final tabIds = [for (final n in items) if (n.tab != null) n.tab!];
+      // لو التبويب الحالي مش في الشريط (اتشال بالتخصيص) نرجع لأول تبويب موجود، وإلا الحسابات.
+      final cur = tabIds.contains(tab) ? tab : (tabIds.isEmpty ? 0 : tabIds.first);
+      // ترتيب العناصر يتبع اتجاه اللغة تلقائيًا (RTL/LTR) عبر Directionality.
+      final pages = <Widget>[const AccountsHome(), const AccountTxPage(embedded: true), const SubscriptionsPage(embedded: true), const MoreTab()];
+      return Scaffold(
+        backgroundColor: p.bg,
+        body: Stack(children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (w, a) => FadeTransition(opacity: a, child: ScaleTransition(scale: Tween<double>(begin: .985, end: 1).animate(a), child: w)),
+            child: KeyedSubtree(key: ValueKey(cur), child: pages[cur]),
+          ),
+          PositionedDirectional(
+            start: 14,
+            end: 14,
+            bottom: 10 + bottom,
             child: Container(
-              height: 70,
+              height: 66,
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(color: p.card.withValues(alpha: .97), borderRadius: BorderRadius.circular(35), border: Border.all(color: p.line.withValues(alpha: .8)), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 18, offset: const Offset(0, 6))]),
-              // ترتيب العناصر يتبع اتجاه اللغة تلقائيًا (RTL/LTR) عبر Directionality.
-              child: ValueListenableBuilder<int>(
-                valueListenable: tabIndex,
-                builder: (_, sel, __) => Row(children: [
-                  _item(sel, 0, Icons.account_balance_wallet_rounded, 'Accounts'),
-                  _item(sel, 1, Icons.format_list_bulleted_rounded, 'Transactions'),
-                  _item(sel, 2, Icons.widgets_rounded, 'Subscriptions'),
-                  _item(sel, 3, Icons.grid_view_rounded, 'More'),
-                ]),
-              ),
+              decoration: BoxDecoration(color: p.card.withValues(alpha: .97), borderRadius: BorderRadius.circular(33), border: Border.all(color: p.line.withValues(alpha: .8)), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 18, offset: const Offset(0, 6))]),
+              child: Row(children: [for (final n in items) _item(n, cur)]),
             ),
           ),
-        ),
-      ]),
-    );
-  }
-}
-
-Widget _tabPage(int i) => switch (i) {
-      0 => const AccountsHome(),
-      1 => const AccountTxPage(embedded: true),
-      2 => const SubscriptionsPage(embedded: true),
-      _ => const MoreTab(),
-    };
-
-/// كل تبويب يُبنى مرة واحدة ويبقى حيًّا (IndexedStack): التنقّل فوري وحالة الصفحة (التمرير والفلاتر) محفوظة،
-/// مع تلاشي سريع للتبويب الجديد (Material fade-through). التبويبات الأخرى تُدفّأ تدريجيًا بعد الإقلاع.
-class _TabHost extends StatefulWidget {
-  const _TabHost();
-  @override
-  State<_TabHost> createState() => _TabHostState();
-}
-
-class _TabHostState extends State<_TabHost> with SingleTickerProviderStateMixin {
-  final Set<int> _built = {0};
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 200), value: 1);
-  late final Animation<double> _fade = CurvedAnimation(parent: _c, curve: const Cubic(.05, .7, .1, 1));
-  int _idx = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _idx = tabIndex.value;
-    _built.add(_idx);
-    tabIndex.addListener(_onTab);
-    for (var i = 1; i < 4; i++) {
-      Future.delayed(Duration(milliseconds: 900 + i * 700), () {
-        if (mounted && !_built.contains(i)) setState(() => _built.add(i));
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    tabIndex.removeListener(_onTab);
-    _c.dispose();
-    super.dispose();
-  }
-
-  void _onTab() {
-    final i = tabIndex.value;
-    if (i == _idx) return;
-    setState(() {
-      _idx = i;
-      _built.add(i);
-    });
-    _c.forward(from: 0);
-  }
-
-  @override
-  Widget build(BuildContext context) => IndexedStack(
-        index: _idx,
-        sizing: StackFit.expand,
-        children: [
-          for (var i = 0; i < 4; i++)
-            if (_built.contains(i))
-              RepaintBoundary(child: FadeTransition(opacity: i == _idx ? _fade : const AlwaysStoppedAnimation<double>(1), child: _tabPage(i)))
-            else
-              const SizedBox.shrink(),
-        ],
+        ]),
       );
-}
-
-/// عنصر الشريط السفلي: مؤشر M3 يتلوّن ويتوسّع بمنحنى emphasized، وضغطة بتصغّر العنصر قليلًا (press feedback).
-class _NavItem extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _NavItem({required this.icon, required this.label, required this.selected, required this.onTap});
-  @override
-  State<_NavItem> createState() => _NavItemState();
-}
-
-class _NavItemState extends State<_NavItem> {
-  bool _down = false;
-  @override
-  Widget build(BuildContext context) {
-    final p = Pal.of(context);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _down = true),
-      onTapCancel: () => setState(() => _down = false),
-      onTapUp: (_) => setState(() => _down = false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _down ? .92 : 1,
-        duration: const Duration(milliseconds: 100),
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(end: widget.selected ? 1 : 0),
-          duration: const Duration(milliseconds: 260),
-          curve: const Cubic(.05, .7, .1, 1),
-          builder: (_, t, __) {
-            final c = Color.lerp(p.ink, kBlue, t)!;
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
-              decoration: BoxDecoration(color: Color.lerp(Colors.transparent, p.field, t), borderRadius: BorderRadius.circular(28)),
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(widget.icon, color: c, size: 27),
-                const SizedBox(height: 2),
-                Text(widget.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: c, fontSize: 12.5, fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500)),
-              ]),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-/// يفتح صفحة حسب مسارها النصي (يُستخدم من الإشعارات): home · tx · subs · more · sub/<id> · assoc · inst · review.
-void openRoute(String go) {
-  final parts = go.split('/');
-  final nav = navKey.currentState;
-  if (nav == null) return;
-  void tabOnly(int i) {
-    nav.popUntil((r) => r.isFirst);
-    tabIndex.value = i;
-  }
-
-  switch (parts[0]) {
-    case 'home':
-      tabOnly(0);
-    case 'tx':
-      tabOnly(1);
-    case 'subs':
-      tabOnly(2);
-    case 'more':
-      tabOnly(3);
-    case 'sub':
-      tabOnly(2);
-      final ctx = nav.overlay?.context;
-      if (parts.length > 1 && ctx != null) showSubDetail(ctx, parts[1]);
-    case 'assoc':
-      nav.popUntil((r) => r.isFirst);
-      nav.push(flowRoute(const AssocPage()));
-    case 'inst':
-      nav.popUntil((r) => r.isFirst);
-      nav.push(flowRoute(const InstPage()));
-    case 'review':
-      nav.popUntil((r) => r.isFirst);
-      nav.push(flowRoute(const SmsReviewPage()));
+    });
   }
 }
 

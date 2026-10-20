@@ -40,15 +40,15 @@ class Repo extends ChangeNotifier {
   bool _seeding = false;
 
   void init() {
-    if (!store.has('cashu_bud')) {
-      store.set('cashu_bud', {'bud_main': Budget(id: 'bud_main', name: 'الميزانية الرئيسية', u: 1).toJson()});
+    if (!store.has('tyr_bud')) {
+      store.set('tyr_bud', {'bud_main': Budget(id: 'bud_main', name: 'الميزانية الرئيسية', u: 1).toJson()});
     }
-    if (!store.has('cashu_acc')) {
-      store.set('cashu_acc', {'acc_main': Account(id: 'acc_main', name: 'الحساب الرئيسي', u: 1).toJson()});
+    if (!store.has('tyr_acc')) {
+      store.set('tyr_acc', {'acc_main': Account(id: 'acc_main', name: 'الحساب الرئيسي', u: 1).toJson()});
     }
     load();
     store.changes.listen((k) {
-      if (k.startsWith('cashu_')) {
+      if (k.startsWith('tyr_')) {
         load();
         notifyListeners();
       }
@@ -65,15 +65,15 @@ class Repo extends ChangeNotifier {
   }
 
   void load() {
-    _acc = _read('cashu_acc', Account.fromJson);
-    _bud = _read('cashu_bud', Budget.fromJson);
-    _tx = _read('cashu_tx', Tx.fromJson);
-    _loan = _read('cashu_loan', Loan.fromJson);
-    _goal = _read('cashu_goal', Goal.fromJson);
-    _ctg = _read('cashu_ctg', CatDef.fromJson);
+    _acc = _read('tyr_acc', Account.fromJson);
+    _bud = _read('tyr_bud', Budget.fromJson);
+    _tx = _read('tyr_tx', Tx.fromJson);
+    _loan = _read('tyr_loan', Loan.fromJson);
+    _goal = _read('tyr_goal', Goal.fromJson);
+    _ctg = _read('tyr_ctg', CatDef.fromJson);
     catLookup = _lookupCat;
     _subs = {};
-    store.peekMap('cashu_cat').forEach((k, v) {
+    store.peekMap('tyr_cat').forEach((k, v) {
       if (v is List) _subs[k] = v.map((e) => '$e').toList();
     });
   }
@@ -101,7 +101,7 @@ class Repo extends ChangeNotifier {
   String get defaultAcc => accList.isEmpty ? 'acc_main' : accList.first.id;
   void saveAccount(Account a) {
     a.u = _now();
-    _put('cashu_acc', a.id, a.toJson());
+    _put('tyr_acc', a.id, a.toJson());
   }
 
   bool deleteAccount(String id) {
@@ -116,7 +116,7 @@ class Repo extends ChangeNotifier {
   Budget budgetFor(Account a) => _bud[a.bud] ?? _bud['bud_main'] ?? Budget(id: 'bud_main', name: 'الميزانية الرئيسية');
   void saveBudget(Budget b) {
     b.u = _now();
-    _put('cashu_bud', b.id, b.toJson());
+    _put('tyr_bud', b.id, b.toJson());
   }
 
   // ---------- المعاملات ----------
@@ -124,7 +124,7 @@ class Repo extends ChangeNotifier {
   Tx? tx(String id) => _tx[id];
   void saveTx(Tx t) {
     t.u = _now();
-    _put('cashu_tx', t.id, t.toJson());
+    _put('tyr_tx', t.id, t.toJson());
   }
 
   void delTx(String id) {
@@ -313,7 +313,7 @@ class Repo extends ChangeNotifier {
   List<Loan> get loanList => (_loan.values.where((l) => !l.del).toList()..sort((a, b) => b.ts.compareTo(a.ts)));
   void addLoan(Loan l) {
     l.u = _now();
-    _put('cashu_loan', l.id, l.toJson());
+    _put('tyr_loan', l.id, l.toJson());
     saveTx(Tx(
         id: 'ln_${l.id}', type: 'loan', amt: l.amt, cur: l.cur, rate: l.rate, acc: l.acc.isEmpty ? defaultAcc : l.acc,
         note: l.person, ts: l.ts, loan: l.id, sign: l.dir == 'owed' ? -1 : 1));
@@ -322,7 +322,7 @@ class Repo extends ChangeNotifier {
   void settleLoan(Loan l) {
     l.settled = true;
     l.u = _now();
-    _put('cashu_loan', l.id, l.toJson());
+    _put('tyr_loan', l.id, l.toJson());
     saveTx(Tx(
         id: 'ls_${l.id}', type: 'loan', amt: l.amt, cur: l.cur, rate: l.rate, acc: l.acc.isEmpty ? defaultAcc : l.acc,
         note: 'تسوية: ${l.person}', ts: _now(), loan: l.id, sign: l.dir == 'owed' ? 1 : -1));
@@ -331,7 +331,7 @@ class Repo extends ChangeNotifier {
   void delLoan(Loan l) {
     l.del = true;
     l.u = _now();
-    _put('cashu_loan', l.id, l.toJson());
+    _put('tyr_loan', l.id, l.toJson());
     for (final id in ['ln_${l.id}', 'ls_${l.id}']) {
       if (_tx.containsKey(id)) delTx(id);
     }
@@ -341,7 +341,7 @@ class Repo extends ChangeNotifier {
   List<Goal> get goalList => _goal.values.where((g) => !g.del).toList()..sort((a, b) => a.id.compareTo(b.id));
   void saveGoal(Goal g) {
     g.u = _now();
-    _put('cashu_goal', g.id, g.toJson());
+    _put('tyr_goal', g.id, g.toJson());
   }
 
   // ---------- التصنيفات (قابلة للتعديل) ----------
@@ -352,7 +352,7 @@ class Repo extends ChangeNotifier {
       return;
     }
     _seeding = true;
-    final m = store.getMap('cashu_ctg');
+    final m = store.getMap('tyr_ctg');
     void add(CatDef d) => m[d.id] = d.toJson();
     var o = 0;
     for (final entry in [(false, kExpCats), (true, kIncCats)]) {
@@ -365,7 +365,7 @@ class Repo extends ChangeNotifier {
         }
       }
     }
-    store.set('cashu_ctg', m);
+    store.set('tyr_ctg', m);
     S.put('ctgSeeded', true);
     _seeding = false;
     load();
@@ -412,16 +412,16 @@ class Repo extends ChangeNotifier {
       saveCat(CatDef(id: 'c_${_now()}', kind: p?.kind ?? 'exp', name: name, parent: catId, ord: subDefs(catId).length));
       return;
     }
-    final m = store.getMap('cashu_cat');
+    final m = store.getMap('tyr_cat');
     final l = List<String>.from(((m[catId] as List?) ?? const []).map((e) => '$e'));
     if (!l.contains(name)) l.add(name);
     m[catId] = l;
-    store.set('cashu_cat', m);
+    store.set('tyr_cat', m);
   }
 
   void saveCat(CatDef d) {
     d.u = _now();
-    _put('cashu_ctg', d.id, d.toJson());
+    _put('tyr_ctg', d.id, d.toJson());
   }
 
   /// تغيير اسم تصنيف فرعي مع تحديث العمليات القديمة اللي مخزّنة باسمه.
@@ -440,20 +440,20 @@ class Repo extends ChangeNotifier {
   void deleteCat(String id) {
     final d = _ctg[id];
     if (d == null) return;
-    final m = store.getMap('cashu_ctg');
+    final m = store.getMap('tyr_ctg');
     final t = _now();
     for (final c in _ctg.values.where((c) => c.id == id || c.parent == id)) {
       c.del = true;
       c.u = t;
       m[c.id] = c.toJson();
     }
-    store.set('cashu_ctg', m);
+    store.set('tyr_ctg', m);
     load();
     notifyListeners();
   }
 
   void reorderCats(List<String> ids) {
-    final m = store.getMap('cashu_ctg');
+    final m = store.getMap('tyr_ctg');
     final t = _now();
     for (var i = 0; i < ids.length; i++) {
       final c = _ctg[ids[i]];
@@ -462,7 +462,7 @@ class Repo extends ChangeNotifier {
       c.u = t;
       m[c.id] = c.toJson();
     }
-    store.set('cashu_ctg', m);
+    store.set('tyr_ctg', m);
     load();
     notifyListeners();
   }
@@ -470,7 +470,7 @@ class Repo extends ChangeNotifier {
   /// عدد المعاملات (غير المحذوفة) على التصنيف — الرئيسي يشمل فروعه.
   int catCount(String id, {String sub = ''}) => _tx.values.where((t) => !t.del && t.cat == id && (sub.isEmpty || t.sub == sub)).length;
 
-  void resetCats() => store.set('cashu_cat', <String, dynamic>{});
+  void resetCats() => store.set('tyr_cat', <String, dynamic>{});
 
   /// مسح كل العمليات (حذف ناعم حتى يصل الحذف لباقي الأجهزة).
   void wipeData() {
@@ -480,12 +480,12 @@ class Repo extends ChangeNotifier {
         t.u = _now();
       }
     }
-    store.set('cashu_tx', _tx.map((k, v) => MapEntry(k, v.toJson())));
+    store.set('tyr_tx', _tx.map((k, v) => MapEntry(k, v.toJson())));
     for (final l in _loan.values.toList()) {
       l.del = true;
       l.u = _now();
     }
-    store.set('cashu_loan', _loan.map((k, v) => MapEntry(k, v.toJson())));
+    store.set('tyr_loan', _loan.map((k, v) => MapEntry(k, v.toJson())));
     load();
     notifyListeners();
   }

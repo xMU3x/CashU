@@ -6,10 +6,12 @@ import '../core/repo.dart';
 import '../core/settings.dart';
 import '../core/sync.dart';
 import '../core/i18n.dart';
+import '../core/util.dart';
 import '../ui/sheets.dart';
 import '../ui/theme.dart';
 import '../ui/widgets.dart';
 import 'profile.dart';
+import 'nav_items.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -117,6 +119,7 @@ class SettingsPage extends StatelessWidget {
           _head(p, 'المظهر'),
           _sw(p, Icons.dark_mode_rounded, 'الوضع الداكن', 'dark', true, on: const Color(0xFF5B8DEF)),
           _sizeRow(p),
+          _row(p, Icons.dock_rounded, 'تخصيص الشريط السفلي', sub: 'أضف أدوات مثل الأقساط والجمعيات (حتى ٦)', onTap: () => Navigator.of(context).push(flowRoute(const NavCustomizePage()))),
           _sw(p, Icons.volume_up_rounded, 'صوت الإضافة', 'sound', true, on: const Color(0xFF2E7568)),
           _sw(p, Icons.sort_rounded, 'التصنيف قبل الملاحظة', 'catFirst', true, sub: 'ترتيب خانتي التصنيف والملاحظة عند الإضافة', on: const Color(0xFF5B8DEF)),
           _head(p, 'حول'),

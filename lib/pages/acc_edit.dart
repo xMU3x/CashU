@@ -31,7 +31,8 @@ String kindTitle(String k) {
 class AccountEditPage extends StatefulWidget {
   final Account? edit;
   final String kind;
-  const AccountEditPage({super.key, this.edit, this.kind = 'cash'});
+  final String? group;
+  const AccountEditPage({super.key, this.edit, this.kind = 'cash', this.group});
   @override
   State<AccountEditPage> createState() => _AccountEditState();
 }
@@ -46,7 +47,7 @@ class _AccountEditState extends State<AccountEditPage> {
   late bool nw = widget.edit?.nw ?? true;
   late bool gb = widget.edit?.gb ?? true;
   late bool ac = widget.edit?.ac ?? true;
-  late String grp = widget.edit?.grp ?? '';
+  late String grp = widget.edit?.grp ?? widget.group ?? '';
   int tab = 0;
 
   @override
@@ -127,7 +128,7 @@ class _AccountEditState extends State<AccountEditPage> {
         child: LayoutBuilder(builder: (c, bc) {
           final w = bc.maxWidth / 2;
           return Stack(children: [
-            AnimatedPositioned(duration: const Duration(milliseconds: 260), curve: Curves.easeOutCubic, left: tab * w, top: 0, bottom: 0, width: w, child: Container(decoration: BoxDecoration(color: const Color(0xFF48484A), borderRadius: BorderRadius.circular(20)))),
+            AnimatedPositionedDirectional(duration: const Duration(milliseconds: 260), curve: Curves.easeOutCubic, start: tab * w, top: 0, bottom: 0, width: w, child: Container(decoration: BoxDecoration(color: const Color(0xFF48484A), borderRadius: BorderRadius.circular(20)))),
             Row(children: [
               for (var i = 0; i < 2; i++) Expanded(child: Tap(scale: .97, onTap: () => setState(() => tab = i), child: Center(child: Text(i == 0 ? 'Basic' : 'Advanced', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500))))),
             ]),
@@ -148,7 +149,7 @@ class _AccountEditState extends State<AccountEditPage> {
             const SizedBox(width: 12),
             Text('Account name', style: TextStyle(fontSize: 15, color: p.ink2)),
             const SizedBox(width: 12),
-            Expanded(child: TextField(controller: name, textAlign: TextAlign.right, style: const TextStyle(fontSize: 16), decoration: const InputDecoration(border: InputBorder.none, isDense: true))),
+            Expanded(child: TextField(controller: name, textAlign: TextAlign.start, style: const TextStyle(fontSize: 16), decoration: const InputDecoration(border: InputBorder.none, isDense: true))),
           ]),
         ),
         hair(p, indent: 14),

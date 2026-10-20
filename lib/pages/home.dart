@@ -209,7 +209,7 @@ class _HomeState extends State<HomePage> {
       Row(children: [
         const Text('اختصارات سريعة', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
         const Spacer(),
-        Tap(onTap: () => Navigator.of(context).push(flowRoute(const ToolsPage())), child: Row(children: [Text('المزيد', style: TextStyle(color: p.ink2, fontSize: 16)), Icon(Icons.chevron_left_rounded, color: p.ink2)])),
+        Tap(onTap: () => Navigator.of(context).push(flowRoute(const ToolsPage())), child: Row(children: [Text('المزيد', style: TextStyle(color: p.ink2, fontSize: 16)), Icon(Icons.chevron_right_rounded, color: p.ink2)])),
       ]),
       const SizedBox(height: 14),
       Row(children: [
@@ -265,7 +265,7 @@ class _HomeState extends State<HomePage> {
             child: Row(children: [
               const Text('المعاملات', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
               const Spacer(),
-              Tap(onTap: () => Navigator.of(context).push(flowRoute(const TxListPage())), child: Row(children: [Text('عرض الكل', style: TextStyle(color: p.ink2, fontSize: 16)), Icon(Icons.chevron_left_rounded, color: p.ink2)])),
+              Tap(onTap: () => Navigator.of(context).push(flowRoute(const TxListPage())), child: Row(children: [Text('عرض الكل', style: TextStyle(color: p.ink2, fontSize: 16)), Icon(Icons.chevron_right_rounded, color: p.ink2)])),
             ]),
           ),
           const SizedBox(height: 6),

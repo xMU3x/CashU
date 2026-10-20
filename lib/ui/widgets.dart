@@ -30,25 +30,16 @@ void soon(BuildContext c, String name) => toast(c, '$name — قريباً');
 
 // ---------- مسارات ----------
 Route<T> flowRoute<T>(Widget page) => PageRouteBuilder<T>(
-      transitionDuration: const Duration(milliseconds: 380),
-      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 360),
+      reverseTransitionDuration: const Duration(milliseconds: 280),
       pageBuilder: (_, __, ___) => page,
-      // Material 3 shared-axis (X): الصفحة الجديدة تدخل بانزلاق قصير + تلاشي، والصفحة اللي تحتها تنزلق للجهة المقابلة وتخفت قليلًا.
-      // منحنيات M3 emphasized (decelerate للدخول / accelerate للخروج). الاتجاه يتبع RTL/LTR.
+      // Material 3 shared-axis (X): انزلاق قصير + تلاشي. الاتجاه يتبع RTL/LTR.
       transitionsBuilder: (ctx, a, sa, child) {
-        const dec = Cubic(.05, .7, .1, 1), acc = Cubic(.3, 0, .8, .15);
-        final c = CurvedAnimation(parent: a, curve: dec, reverseCurve: acc);
-        final s2 = CurvedAnimation(parent: sa, curve: dec, reverseCurve: acc);
+        final c = CurvedAnimation(parent: a, curve: Curves.easeOutQuart, reverseCurve: Curves.easeInCubic);
         final dx = isAr ? -.08 : .08;
-        return SlideTransition(
-          position: Tween<Offset>(begin: Offset.zero, end: Offset(-dx * .35, 0)).animate(s2),
-          child: FadeTransition(
-            opacity: Tween<double>(begin: 1, end: .6).animate(s2),
-            child: FadeTransition(
-              opacity: Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: a, curve: const Interval(0, .65, curve: Curves.easeOut))),
-              child: SlideTransition(position: Tween<Offset>(begin: Offset(dx, 0), end: Offset.zero).animate(c), child: child),
-            ),
-          ),
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: a, curve: const Interval(0, .65, curve: Curves.easeOut))),
+          child: SlideTransition(position: Tween<Offset>(begin: Offset(dx, 0), end: Offset.zero).animate(c), child: child),
         );
       },
     );
@@ -82,8 +73,6 @@ Future<T?> showSheet<T>(BuildContext context, Widget Function(BuildContext) b) =
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black54,
-      // حركة البانل: دخول emphasized-decelerate وخروج أسرع (M3).
-      sheetAnimationStyle: const AnimationStyle(duration: Duration(milliseconds: 380), curve: Cubic(.05, .7, .1, 1), reverseDuration: Duration(milliseconds: 260), reverseCurve: Cubic(.3, 0, .8, .15)),
       builder: b,
     );
 
@@ -148,7 +137,7 @@ class TopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 18, offset: const Offset(0, 6))]),
       child: Row(children: [
-        if (back) ...[RoundBtn(isAr ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded, () => Navigator.of(context).maybePop()), const SizedBox(width: 12)],
+        if (back) ...[RoundBtn(Icons.arrow_back_rounded, () => Navigator.of(context).maybePop()), const SizedBox(width: 12)],
         if (icon != null) ...[Icon(icon, color: iconColor ?? p.acc, size: 26), const SizedBox(width: 10)],
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [

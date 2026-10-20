@@ -37,4 +37,18 @@ void main() {
     expect(r.trial, true);
     expect(r.pays.single.amt, 200);
   });
+
+  test('الاشتراك: الصورة واللون المخصّصان وحساب الدفعة يُحفظان ويُسترجعان', () {
+    final s = Sub(id: 's', name: 'n', amt: 60, first: 0, img: 'data:image/png;base64,AAAA', colorV: 0xFF5822B4);
+    s.pays.add(SubPay(5, 60, 'acc1'));
+    final r = Sub.fromJson(s.toJson());
+    expect(r.img, 'data:image/png;base64,AAAA');
+    expect(r.colorV, 0xFF5822B4);
+    expect(r.pays.single.acc, 'acc1');
+    // بيانات قديمة بدون الحقول الجديدة تتحمّل بقيم افتراضية
+    final old = Sub.fromJson({'id': 'o', 'name': 'x', 'amt': 10, 'first': 0, 'pays': [{'ts': 1, 'amt': 10}]});
+    expect(old.img, '');
+    expect(old.colorV, 0);
+    expect(old.pays.single.acc, '');
+  });
 }

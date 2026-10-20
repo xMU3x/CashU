@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart' hide Text;
 import '../core/extras.dart';
+import '../core/icon_pick.dart';
 import '../core/i18n.dart';
-import '../core/notify.dart';
 import '../core/repo.dart';
 import '../core/settings.dart';
 import '../ui/anim.dart';
@@ -21,29 +22,46 @@ String _n(double v) {
 String _m(double v) => S.flag('hide') ? '••••' : '${_n(v)} ج.م';
 
 class _Svc {
-  final String key, ar, en, group;
+  final String key, ar, en, group, domain;
   final Color color;
-  const _Svc(this.key, this.ar, this.en, this.color, this.group);
+  const _Svc(this.key, this.ar, this.en, this.color, this.group, this.domain);
 }
 
 const _kSvcs = <_Svc>[
-  _Svc('netflix', 'نتفليكس', 'Netflix', Color(0xFFE50914), 'مشاهدة وبث'),
-  _Svc('shahid', 'شاهد', 'Shahid', Color(0xFF1F8A5B), 'مشاهدة وبث'),
-  _Svc('osn', 'أو إس إن+', 'OSN+', Color(0xFF7B2FF2), 'مشاهدة وبث'),
-  _Svc('starz', 'ستارزبلاي', 'StarzPlay', Color(0xFF1B6B7A), 'مشاهدة وبث'),
-  _Svc('disney', 'ديزني+', 'Disney+', Color(0xFF113CCF), 'مشاهدة وبث'),
-  _Svc('prime', 'برايم فيديو', 'Prime Video', Color(0xFF00A8E1), 'مشاهدة وبث'),
-  _Svc('appletv', 'أبل تي في+', 'Apple TV+', Color(0xFF48484A), 'مشاهدة وبث'),
-  _Svc('max', 'ماكس', 'Max', Color(0xFF5822B4), 'مشاهدة وبث'),
-  _Svc('hulu', 'هولو', 'Hulu', Color(0xFF1CAE6B), 'مشاهدة وبث'),
-  _Svc('paramount', 'باراماونت+', 'Paramount+', Color(0xFF0064FF), 'مشاهدة وبث'),
-  _Svc('youtube', 'يوتيوب بريميوم', 'YouTube Premium', Color(0xFFE62117), 'مشاهدة وبث'),
-  _Svc('spotify', 'سبوتيفاي', 'Spotify', Color(0xFF1DB954), 'موسيقى'),
-  _Svc('anghami', 'أنغامي', 'Anghami', Color(0xFF8E24AA), 'موسيقى'),
-  _Svc('icloud', 'آي كلاود+', 'iCloud+', Color(0xFF3693F3), 'تخزين وأدوات'),
-  _Svc('google', 'جوجل ون', 'Google One', Color(0xFF4285F4), 'تخزين وأدوات'),
-  _Svc('chatgpt', 'ChatGPT', 'ChatGPT', Color(0xFF10A37F), 'تخزين وأدوات'),
-  _Svc('m365', 'مايكروسوفت 365', 'Microsoft 365', Color(0xFFD83B01), 'تخزين وأدوات'),
+  _Svc('netflix', 'نتفليكس', 'Netflix', Color(0xFFE50914), 'مشاهدة وبث', 'netflix.com'),
+  _Svc('shahid', 'شاهد', 'Shahid', Color(0xFF1F8A5B), 'مشاهدة وبث', 'shahid.mbc.net'),
+  _Svc('watchit', 'ووتش إت', 'Watch iT', Color(0xFFE6007E), 'مشاهدة وبث', 'watchit.com'),
+  _Svc('osn', 'أو إس إن+', 'OSN+', Color(0xFF6C3FD1), 'مشاهدة وبث', 'osn.com'),
+  _Svc('starz', 'ستارزبلاي', 'StarzPlay', Color(0xFF1B6B7A), 'مشاهدة وبث', 'starzplay.com'),
+  _Svc('disney', 'ديزني+', 'Disney+', Color(0xFF113CCF), 'مشاهدة وبث', 'disneyplus.com'),
+  _Svc('prime', 'برايم فيديو', 'Prime Video', Color(0xFF00A8E1), 'مشاهدة وبث', 'primevideo.com'),
+  _Svc('appletv', 'أبل تي في+', 'Apple TV+', Color(0xFF6E6E73), 'مشاهدة وبث', 'tv.apple.com'),
+  _Svc('max', 'ماكس', 'Max', Color(0xFF5822B4), 'مشاهدة وبث', 'max.com'),
+  _Svc('hulu', 'هولو', 'Hulu', Color(0xFF1CAE6B), 'مشاهدة وبث', 'hulu.com'),
+  _Svc('paramount', 'باراماونت+', 'Paramount+', Color(0xFF0064FF), 'مشاهدة وبث', 'paramountplus.com'),
+  _Svc('crunchyroll', 'كرنشي رول', 'Crunchyroll', Color(0xFFF47521), 'مشاهدة وبث', 'crunchyroll.com'),
+  _Svc('youtube', 'يوتيوب بريميوم', 'YouTube Premium', Color(0xFFE62117), 'مشاهدة وبث', 'youtube.com'),
+  _Svc('spotify', 'سبوتيفاي', 'Spotify', Color(0xFF1DB954), 'موسيقى', 'spotify.com'),
+  _Svc('anghami', 'أنغامي', 'Anghami', Color(0xFF8E24AA), 'موسيقى', 'anghami.com'),
+  _Svc('applemusic', 'أبل ميوزك', 'Apple Music', Color(0xFFFA243C), 'موسيقى', 'music.apple.com'),
+  _Svc('ytmusic', 'يوتيوب ميوزك', 'YouTube Music', Color(0xFFFF0000), 'موسيقى', 'music.youtube.com'),
+  _Svc('deezer', 'ديزر', 'Deezer', Color(0xFFA238FF), 'موسيقى', 'deezer.com'),
+  _Svc('icloud', 'آي كلاود+', 'iCloud+', Color(0xFF3693F3), 'تخزين وأدوات', 'icloud.com'),
+  _Svc('google', 'جوجل ون', 'Google One', Color(0xFF4285F4), 'تخزين وأدوات', 'one.google.com'),
+  _Svc('dropbox', 'دروب بوكس', 'Dropbox', Color(0xFF0061FF), 'تخزين وأدوات', 'dropbox.com'),
+  _Svc('chatgpt', 'ChatGPT', 'ChatGPT', Color(0xFF10A37F), 'تخزين وأدوات', 'chatgpt.com'),
+  _Svc('claude', 'Claude', 'Claude', Color(0xFFD97757), 'تخزين وأدوات', 'claude.ai'),
+  _Svc('m365', 'مايكروسوفت 365', 'Microsoft 365', Color(0xFFD83B01), 'تخزين وأدوات', 'microsoft365.com'),
+  _Svc('adobe', 'أدوبي', 'Adobe', Color(0xFFFA0F00), 'تخزين وأدوات', 'adobe.com'),
+  _Svc('canva', 'كانفا', 'Canva', Color(0xFF00A3AD), 'تخزين وأدوات', 'canva.com'),
+  _Svc('notion', 'نوشن', 'Notion', Color(0xFF6E6E73), 'تخزين وأدوات', 'notion.so'),
+  _Svc('telegram', 'تيليجرام بريميوم', 'Telegram Premium', Color(0xFF26A5E4), 'تواصل وتعلّم', 'telegram.org'),
+  _Svc('xpremium', 'إكس بريميوم', 'X Premium', Color(0xFF1D9BF0), 'تواصل وتعلّم', 'x.com'),
+  _Svc('linkedin', 'لينكدإن بريميوم', 'LinkedIn Premium', Color(0xFF0A66C2), 'تواصل وتعلّم', 'linkedin.com'),
+  _Svc('duolingo', 'دولينجو', 'Duolingo', Color(0xFF58CC02), 'تواصل وتعلّم', 'duolingo.com'),
+  _Svc('xbox', 'إكس بوكس جيم باس', 'Xbox Game Pass', Color(0xFF107C10), 'ألعاب', 'xbox.com'),
+  _Svc('playstation', 'بلايستيشن بلس', 'PlayStation Plus', Color(0xFF0070D1), 'ألعاب', 'playstation.com'),
+  _Svc('nintendo', 'نينتندو أونلاين', 'Nintendo Switch Online', Color(0xFFE60012), 'ألعاب', 'nintendo.com'),
 ];
 
 _Svc? _svcOf(String k) {
@@ -53,7 +71,47 @@ _Svc? _svcOf(String k) {
   return null;
 }
 
-Color _colorOf(Sub s) => _svcOf(s.svc)?.color ?? const Color(0xFFB07A4A);
+Color _colorOf(Sub s) => s.colorV != 0 ? Color(s.colorV) : (_svcOf(s.svc)?.color ?? kBlue);
+
+/// لون نص/تفاصيل واضح فوق خلفية الاشتراك المتلوّنة (فاتح في الداكن، غامق في الفاتح).
+Color _fg(BuildContext c, Color col) => Theme.of(c).brightness == Brightness.dark ? Color.lerp(col, Colors.white, .5)! : Color.lerp(col, Colors.black, .35)!;
+
+const _kPalette = <int>[0xFFE50914, 0xFFF5A623, 0xFFF2C94C, 0xFF1DB954, 0xFF16A394, 0xFF3693F3, 0xFF5822B4, 0xFF8E24AA, 0xFFE91E63, 0xFF6E6E73];
+
+/// لوجو الخدمة: صورة مخصّصة (رفع/رابط) ← أيقونة الخدمة الرسمية (favicon عالي الجودة) ← حرف ملوّن.
+class _SubLogo extends StatelessWidget {
+  final String name, svc, img;
+  final Color color;
+  final double size;
+  const _SubLogo({required this.name, required this.svc, this.img = '', required this.color, this.size = 48});
+
+  @override
+  Widget build(BuildContext context) {
+    final r = BorderRadius.circular(size * .28);
+    final fb = _logo(name, color, size: size);
+    Widget net(String url, {bool white = false}) => ClipRRect(
+          borderRadius: r,
+          child: Container(
+            width: size,
+            height: size,
+            color: white ? Colors.white : Colors.transparent,
+            padding: EdgeInsets.all(white ? size * .14 : 0),
+            child: Image.network(url, fit: BoxFit.cover, errorBuilder: (c, e, s) => fb, loadingBuilder: (c, ch, pr) => pr == null ? ch : fb),
+          ),
+        );
+    if (img.startsWith('data:image')) {
+      try {
+        return ClipRRect(borderRadius: r, child: Image.memory(base64Decode(img.substring(img.indexOf(',') + 1)), width: size, height: size, fit: BoxFit.cover, gaplessPlayback: true, errorBuilder: (c, e, s) => fb));
+      } catch (_) {
+        return fb;
+      }
+    }
+    if (img.startsWith('http')) return net(img);
+    final sv = _svcOf(svc);
+    if (sv != null) return net('https://www.google.com/s2/favicons?domain=${sv.domain}&sz=128', white: true);
+    return fb;
+  }
+}
 
 Widget _logo(String name, Color c, {double size = 48}) => Container(
       width: size,
@@ -105,7 +163,7 @@ class _SubsState extends State<SubscriptionsPage> {
           const SizedBox(width: 10),
           const Expanded(child: Text('اشتراكاتي', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800))),
           if (!widget.embedded)
-            Tap(onTap: () => Navigator.of(context).maybePop(), child: Container(width: 44, height: 44, decoration: BoxDecoration(color: p.field, shape: BoxShape.circle), child: Icon(isAr ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded, color: p.ink2))),
+            Tap(onTap: () => Navigator.of(context).maybePop(), child: Container(width: 44, height: 44, decoration: BoxDecoration(color: p.field, shape: BoxShape.circle), child: Icon(Icons.arrow_back_rounded, color: p.ink2))),
         ]),
       );
 
@@ -114,8 +172,8 @@ class _SubsState extends State<SubscriptionsPage> {
         const SizedBox(height: 18),
         Container(
           height: 150,
-          decoration: BoxDecoration(color: const Color(0xFF263438), borderRadius: BorderRadius.circular(28)),
-          child: Center(child: Container(width: 92, height: 92, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFF4A8A82), width: 6)), child: const Icon(Icons.add_rounded, color: Color(0xFF4A8A82), size: 36))),
+          decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(28)),
+          child: Center(child: Container(width: 92, height: 92, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: kBlue, width: 6)), child: const Icon(Icons.add_rounded, color: kBlue, size: 36))),
         ),
         const SizedBox(height: 22),
         const Text('بتدفع كام فعلًا على الاشتراكات؟', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, height: 1.3)),
@@ -123,9 +181,9 @@ class _SubsState extends State<SubscriptionsPage> {
         Text('ضيفهم وهتشوف كل واحد قد إيه من شهرك، وهنفكرك قبل ما أي واحد يتجدد.', style: TextStyle(fontSize: 15, color: p.ink2, height: 1.5)),
         const SizedBox(height: 22),
         Row(children: [
-          Expanded(child: _bigCard(p, Icons.grid_view_rounded, 'اختار من القائمة', 'شاهد، Netflix، وغيرهم', const Color(0xFF263438), const Color(0xFF6FC3B8), () => _addFlow())),
+          Expanded(child: _bigCard(p, Icons.grid_view_rounded, 'اختار من القائمة', 'شاهد، Netflix، وغيرهم', p.card, kBlue, () => _addFlow())),
           const SizedBox(width: 12),
-          Expanded(child: _bigCard(p, Icons.edit_rounded, 'ضيفه بنفسك', 'النادي، النت، أي حاجة', const Color(0xFF3D2F2D), const Color(0xFFD99A83), () => _addFlow(pick: false))),
+          Expanded(child: _bigCard(p, Icons.edit_rounded, 'ضيفه بنفسك', 'النادي، النت، أي حاجة', p.card, kBlue, () => _addFlow(pick: false))),
         ]),
       ]);
 
@@ -139,7 +197,7 @@ class _SubsState extends State<SubscriptionsPage> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Icon(ic, color: fg, size: 28),
             const Spacer(),
-            Text(t, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
+            Text(t, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink)),
             const SizedBox(height: 2),
             Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, color: fg)),
           ]),
@@ -232,10 +290,10 @@ class _SubsState extends State<SubscriptionsPage> {
         child: Container(
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-          decoration: BoxDecoration(color: p.card, borderRadius: BorderRadius.circular(24)),
+          decoration: BoxDecoration(color: Color.alphaBlend(col.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? .16 : .09), p.card), borderRadius: BorderRadius.circular(24), border: Border.all(color: col.withValues(alpha: .28))),
           child: Column(children: [
             Row(children: [
-              _logo(s.name, col),
+              _SubLogo(name: s.name, svc: s.svc, img: s.img, color: col),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -281,10 +339,10 @@ class _SubsState extends State<SubscriptionsPage> {
           PositionedDirectional(
             end: 20,
             bottom: widget.embedded ? 104 : 28,
-            child: FabIn(child: Tap(
+            child: Tap(
               onTap: () => _addFlow(),
               child: Container(width: 64, height: 64, decoration: BoxDecoration(color: p.ink, borderRadius: BorderRadius.circular(22), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .3), blurRadius: 14, offset: const Offset(0, 6))]), child: Icon(Icons.add_rounded, color: p.bg, size: 30)),
-            )),
+            ),
           ),
         ]);
       }),
@@ -357,7 +415,7 @@ class _SvcSheetState extends State<_SvcSheet> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(children: [
-                      _logo(s.en, s.color, size: 52),
+                      _SubLogo(name: s.en, svc: s.key, color: s.color, size: 52),
                       const SizedBox(width: 14),
                       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(s.ar, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)), Text(s.en, style: TextStyle(fontSize: 14, color: p.ink2))])),
                     ]),
@@ -391,7 +449,8 @@ class SubFormPage extends StatefulWidget {
 }
 
 class _SubFormState extends State<SubFormPage> {
-  String name = '', svc = '', cyc = 'month', acc = '', note = '';
+  String name = '', svc = '', cyc = 'month', acc = '', note = '', img = '';
+  int colorV = 0;
   double amt = 0;
   DateTime first = DateTime.now(), trialEnd = DateTime.now().add(const Duration(days: 7));
   DateTime? until;
@@ -418,6 +477,8 @@ class _SubFormState extends State<SubFormPage> {
       auto = e.auto;
       budget = e.budget;
       remind = e.remind;
+      img = e.img;
+      colorV = e.colorV;
     }
   }
 
@@ -450,12 +511,76 @@ class _SubFormState extends State<SubFormPage> {
       ..trialEnd = trial ? trialEnd.millisecondsSinceEpoch : 0
       ..auto = auto
       ..budget = budget
-      ..remind = remind;
+      ..remind = remind
+      ..img = img
+      ..colorV = colorV;
     extras.saveSub(s);
-    if (remind >= 0) notifier.requestPermission();
     if (auto) extras.runAuto();
     if (mounted) Navigator.of(context).pop();
   }
+
+  /// تخصيص صورة الاشتراك: رفع من الجهاز، سحب من رابط، أو العودة للأيقونة الرسمية.
+  Future<void> _imageSheet() async {
+    final p = Pal.of(context);
+    Widget row(IconData ic, String t, Future<void> Function() f) => Tap(
+          onTap: () async {
+            Navigator.of(context).pop();
+            await f();
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: p.field, borderRadius: BorderRadius.circular(22)),
+            child: Row(children: [
+              Container(width: 44, height: 44, decoration: BoxDecoration(color: kBlue.withValues(alpha: .16), borderRadius: BorderRadius.circular(14)), child: Icon(ic, color: kBlue)),
+              const SizedBox(width: 14),
+              Expanded(child: Text(t, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600))),
+            ]),
+          ),
+        );
+    await showSheet<void>(context, (c) => SheetFrame(
+          title: 'صورة الاشتراك',
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              row(Icons.photo_library_rounded, 'رفع من الجهاز', () async {
+                final r = await pickIconFromGallery();
+                if (r != null && mounted) setState(() => img = r);
+              }),
+              row(Icons.link_rounded, 'سحب من رابط صورة', () async {
+                final u = await promptText(context, 'رابط الصورة', hint: 'https://...');
+                if (u == null || u.trim().isEmpty) return;
+                if (mounted) toast(context, 'جارٍ تحميل الصورة...');
+                final r = await iconFromUrl(u);
+                if (!mounted) return;
+                if (r == null) {
+                  toast(context, 'تعذّر تحميل الصورة من الرابط');
+                } else {
+                  setState(() => img = r);
+                }
+              }),
+              row(Icons.auto_awesome_rounded, 'استخدام الأيقونة الرسمية للخدمة', () async => setState(() => img = '')),
+            ]),
+          ),
+        ));
+  }
+
+  Widget _palette(Pal p) => Wrap(spacing: 10, runSpacing: 10, children: [
+        Tap(
+          onTap: () => setState(() => colorV = 0),
+          child: Container(height: 38, padding: const EdgeInsets.symmetric(horizontal: 14), alignment: Alignment.center, decoration: BoxDecoration(color: colorV == 0 ? kBlue.withValues(alpha: .18) : p.card, borderRadius: BorderRadius.circular(19), border: Border.all(color: colorV == 0 ? kBlue : Colors.transparent)), child: Text('تلقائي', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: colorV == 0 ? kBlue : p.ink2))),
+        ),
+        for (final v in _kPalette)
+          Tap(
+            onTap: () => setState(() => colorV = v),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(color: Color(v), shape: BoxShape.circle, border: Border.all(color: colorV == v ? p.ink : Colors.transparent, width: 2.5)),
+              child: colorV == v ? const Icon(Icons.check_rounded, color: Colors.white, size: 20) : null,
+            ),
+          ),
+      ]);
 
   Widget _label(Pal p, String t) => Padding(padding: const EdgeInsets.fromLTRB(6, 18, 6, 8), child: Text(t, style: TextStyle(fontSize: 15, color: p.ink2)));
 
@@ -485,8 +610,8 @@ class _SubFormState extends State<SubFormPage> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              decoration: BoxDecoration(color: o.$1 == sel ? const Color(0xFF3B2F22) : p.card, borderRadius: BorderRadius.circular(18)),
-              child: Text(o.$2, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: o.$1 == sel ? kOrange : p.ink2)),
+              decoration: BoxDecoration(color: o.$1 == sel ? kBlue.withValues(alpha: .18) : p.card, borderRadius: BorderRadius.circular(18), border: Border.all(color: o.$1 == sel ? kBlue : Colors.transparent)),
+              child: Text(o.$2, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: o.$1 == sel ? kBlue : p.ink2)),
             ),
           ),
       ]);
@@ -514,8 +639,14 @@ class _SubFormState extends State<SubFormPage> {
           child: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 20), physics: const BouncingScrollPhysics(), children: [
             _label(p, 'التفاصيل'),
             Row(children: [
-              _logo(name, _svcOf(svc)?.color ?? const Color(0xFFB07A4A), size: 60),
-              const SizedBox(width: 12),
+              Tap(
+                onTap: _imageSheet,
+                child: Stack(clipBehavior: Clip.none, children: [
+                  _SubLogo(name: name, svc: svc, img: img, color: colorV != 0 ? Color(colorV) : (_svcOf(svc)?.color ?? kBlue), size: 64),
+                  PositionedDirectional(bottom: -4, end: -4, child: Container(width: 24, height: 24, decoration: BoxDecoration(color: kBlue, shape: BoxShape.circle, border: Border.all(color: p.bg, width: 2)), child: const Icon(Icons.edit_rounded, color: Colors.white, size: 13))),
+                ]),
+              ),
+              const SizedBox(width: 14),
               Expanded(child: _field(p, Icons.inventory_2_outlined, 'اسم الخدمة', name, () async {
                 final r = await promptText(context, 'اسم الخدمة', hint: 'اسم الخدمة', initial: name);
                 if (r != null) setState(() => name = r.trim());
@@ -526,6 +657,8 @@ class _SubFormState extends State<SubFormPage> {
               final r = await showCalc(context, amt, 'EGP');
               if (r != null) setState(() => amt = r < 0 ? 0 : r);
             }, small: 'قيمة الدفعة (ج.م)'),
+            _label(p, 'لون الاشتراك'),
+            _palette(p),
             _label(p, 'دورة الدفع'),
             _chips(p, kSubCycles, cyc, (v) => cyc = v),
             _label(p, 'المواعيد'),
@@ -537,8 +670,8 @@ class _SubFormState extends State<SubFormPage> {
               Container(
                 margin: const EdgeInsets.only(top: 10),
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(color: const Color(0xFF223539), borderRadius: BorderRadius.circular(16)),
-                child: Text('يعني الدفعة الجاية يوم ${enDate(_nextPreview)}', style: const TextStyle(color: Color(0xFF8FD3C8), fontSize: 15)),
+                decoration: BoxDecoration(color: kBlue.withValues(alpha: .12), borderRadius: BorderRadius.circular(16)),
+                child: Text('يعني الدفعة الجاية يوم ${enDate(_nextPreview)}', style: const TextStyle(color: kBlue, fontSize: 15)),
               ),
             _label(p, 'هيفضل شغال لحد إمتى؟'),
             _chips(p, const [('none', 'لحد ما ألغيه'), ('date', 'لحد يوم معيّن')], until == null ? 'none' : 'date', (v) => until = v == 'none' ? null : (until ?? DateTime.now().add(const Duration(days: 365)))),
@@ -644,14 +777,70 @@ class _SubDetailState extends State<_SubDetail> {
         ));
   }
 
+  /// بانل تسجيل دفعة: القيمة + التاريخ + الحساب اللي اتسحبت منه، وبتنزل في المعاملات.
+  Future<void> _payPanel(Sub s) async {
+    var amt = s.amt;
+    var date = DateTime.now();
+    var acc = s.acc.isEmpty ? repo.defaultAcc : s.acc;
+    await showSheet<void>(context, (c) => StatefulBuilder(builder: (c, set) {
+          final p = Pal.of(c);
+          Widget field(IconData ic, String label, String value, Future<void> Function() f) => Tap(
+                onTap: () => f(),
+                scale: .99,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  height: 64,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(color: p.field, borderRadius: BorderRadius.circular(22)),
+                  child: Row(children: [
+                    Icon(ic, color: p.ink2, size: 22),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: TextStyle(fontSize: 12.5, color: p.ink2)), Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600))])),
+                  ]),
+                ),
+              );
+          final a = repo.account(acc);
+          return SheetFrame(
+            title: 'سجّل دفعة',
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Padding(padding: const EdgeInsets.only(bottom: 14), child: Text(s.name, style: TextStyle(fontSize: 15, color: p.ink2))),
+                field(Icons.payments_outlined, 'قيمة الدفعة (ج.م)', _n(amt), () async {
+                  final r = await showCalc(c, amt, 'EGP');
+                  if (r != null && r > 0) set(() => amt = r);
+                }),
+                field(Icons.event_rounded, 'تاريخ الدفعة', enDate(date), () async {
+                  final d = await showDateSheet(c, date, title: 'تاريخ الدفعة');
+                  if (d != null) set(() => date = d);
+                }),
+                field(Icons.credit_card_rounded, 'اتسحبت من حساب', a == null ? 'اختر الحساب' : a.name, () async {
+                  final r = await showPickAccount(c, acc);
+                  if (r != null) set(() => acc = r);
+                }),
+                const SizedBox(height: 6),
+                bigButton(p, 'حفظ', kBlue, () {
+                  final now = DateTime.now();
+                  final ts = DateTime(date.year, date.month, date.day, now.hour, now.minute, now.second).millisecondsSinceEpoch;
+                  extras.paySub(s, ts: ts, amt: amt, acc: acc);
+                  Navigator.of(c).pop();
+                  toast(context, 'اتسجلت دفعة ${_m(amt)}');
+                }),
+              ]),
+            ),
+          );
+        }));
+  }
+
   Widget _timeline(Pal p, Sub s) {
-    final col = _colorOf(s);
+    final base = _colorOf(s);
+    final col = _fg(context, base);
     final next = s.nextDue;
     final end = s.until > 0 ? enDate(DateTime.fromMillisecondsSinceEpoch(s.until)) : 'لحد ما تلغيه';
     Widget col3(String a, String b, CrossAxisAlignment al) => Column(crossAxisAlignment: al, children: [Text(a, style: TextStyle(fontSize: 14, color: col)), const SizedBox(height: 2), Text(b, style: TextStyle(fontSize: 15, color: col, fontWeight: FontWeight.w700))]);
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: col.withValues(alpha: .14), borderRadius: BorderRadius.circular(24)),
+      decoration: BoxDecoration(color: base.withValues(alpha: .18), borderRadius: BorderRadius.circular(24), border: Border.all(color: base.withValues(alpha: .35))),
       child: Column(children: [
         SizedBox(
           height: 22,
@@ -686,7 +875,7 @@ class _SubDetailState extends State<_SubDetail> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              _logo(s.name, _colorOf(s), size: 58),
+              _SubLogo(name: s.name, svc: s.svc, img: s.img, color: _colorOf(s), size: 58),
               const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(s.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)), Text('${_m(s.amt)}  ·  ${cycleName(s.cyc)}', style: TextStyle(fontSize: 15, color: p.ink2))])),
               Tap(onTap: () => _menu(s), child: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.more_horiz_rounded, color: p.ink2))),
@@ -698,10 +887,7 @@ class _SubDetailState extends State<_SubDetail> {
             const SizedBox(height: 10),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('بتدفع بإيه', style: TextStyle(fontSize: 15, color: p.ink2)), Text(accName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))]),
             const SizedBox(height: 14),
-            if (s.state == 'active') bigButton(p, 'سجّل دفعة', const Color(0xFFF2B87C), () {
-              extras.paySub(s);
-              toast(context, 'اتسجلت دفعة ${_m(s.amt)}');
-            }),
+            if (s.state == 'active') bigButton(p, 'سجّل دفعة', kBlue, () => _payPanel(s)),
             const SizedBox(height: 12),
             Tap(
               onTap: () => setState(() => openLog = !openLog),
@@ -720,7 +906,7 @@ class _SubDetailState extends State<_SubDetail> {
                   ? Column(children: [
                       if (s.pays.isEmpty) Padding(padding: const EdgeInsets.all(14), child: Text('لسه مفيش دفعات.', style: TextStyle(color: p.ink2))),
                       for (final x in s.pays)
-                        Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(enDate(DateTime.fromMillisecondsSinceEpoch(x.ts)), style: TextStyle(color: p.ink2)), Text(_m(x.amt), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))])),
+                        Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('${enDate(DateTime.fromMillisecondsSinceEpoch(x.ts))}${x.acc.isEmpty ? '' : '  ·  ${repo.account(x.acc)?.name ?? ''}'}', style: TextStyle(color: p.ink2)), Text(_m(x.amt), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))])),
                     ])
                   : const SizedBox(width: double.infinity),
             ),

@@ -7,6 +7,17 @@ import '../ui/theme.dart';
 import '../ui/widgets.dart';
 import 'settings_page.dart';
 
+void showWhatsNew(BuildContext context) => showSheet<void>(context, (c) => SheetFrame(
+      title: 'ما الجديد',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          for (final t in const ['شاشة اشتراكاتي الجديدة: دونات ونسب وتجربة مجانية وسجل دفعات', 'الجمعيات والأقساط', 'الحسابات المؤرشفة مع إمكانية الاسترجاع', 'شريط سفلي جديد قابل للتخصيص'])
+            Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Icon(Icons.auto_awesome_outlined, size: 18, color: kBlue), const SizedBox(width: 10), Expanded(child: Text(t, style: const TextStyle(fontSize: 15)))])),
+        ]),
+      ),
+    ));
+
 Future<void> showProfileSheet(BuildContext context) => showSheet<void>(context, (c) => const _ProfileSheet());
 
 class _ProfileSheet extends StatelessWidget {
@@ -70,6 +81,7 @@ class _ProfileSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(flowRoute(const SettingsPage()));
               }),
+              row(Icons.auto_awesome_outlined, 'ما الجديد', () => showWhatsNew(context)),
               row(Icons.contrast_rounded, 'المظهر', () => showAppearanceSheet(context)),
               row(Icons.language_rounded, 'اللغة', () => showLanguageSheet(context)),
               row(Icons.person_add_alt_1_rounded, 'إضافة حساب جوجل آخر', () async {

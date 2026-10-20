@@ -53,7 +53,7 @@ class MoreTab extends StatelessWidget {
                   Text(sub, style: TextStyle(fontSize: 12.5, color: p.ink2)),
                 ]),
               ),
-              Icon(Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: p.ink2),
+              Icon(Icons.chevron_right_rounded, color: p.ink2),
             ]),
           ),
         ),
