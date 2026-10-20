@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide Text;
 import '../ui/loc_text.dart';
-import '../core/i18n.dart';
 import '../core/models.dart';
 import '../core/repo.dart';
 import '../ui/anim.dart';

@@ -1,11 +1,9 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart' hide Text;
 import '../ui/loc_text.dart';
 import '../core/groups.dart';
 import '../core/models.dart';
 import '../core/repo.dart';
 import '../core/settings.dart';
-import '../core/store.dart';
 import '../core/sync.dart';
 import '../sms/sms_tracker.dart';
 import '../ui/anim.dart';
@@ -322,7 +320,7 @@ class _AccountsHomeState extends State<AccountsHome> {
           }
           a.arch = true;
           repo.saveAccount(a);
-          toast(context, '\"${a.name}\" archived');
+          toast(context, 'تمت أرشفة "${a.name}"');
         }, danger: true),
         AccMenuAction(Icons.delete_outline_rounded, 'Delete', () => _delAcc(a), danger: true),
       ]);
@@ -464,39 +462,5 @@ class _AccountsHomeState extends State<AccountsHome> {
         ),
       ]);
     });
-  }
-}
-
-/// رسم خطي بسيط لاتجاه صافي الأرصدة.
-class _SparkPainter extends CustomPainter {
-  final List<double> v;
-  final Color c;
-  _SparkPainter(this.v, this.c);
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (v.length < 2) return;
-    final lo = v.reduce(math.min), hi = v.reduce(math.max);
-    final span = (hi - lo).abs() < 1e-9 ? 1.0 : hi - lo;
-    Offset pt(int i) => Offset(size.width * i / (v.length - 1), size.height - 6 - (size.height - 12) * ((v[i] - lo) / span));
-    final line = Path()..moveTo(pt(0).dx, pt(0).dy);
-    for (var i = 1; i < v.length; i++) {
-      final a = pt(i - 1), b = pt(i), mx = (a.dx + b.dx) / 2;
-      line.cubicTo(mx, a.dy, mx, b.dy, b.dx, b.dy);
-    }
-    final fill = Path.from(line)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(fill, Paint()..shader = LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [c.withValues(alpha: .28), c.withValues(alpha: 0)]).createShader(Offset.zero & size));
-    canvas.drawPath(line, Paint()..color = c..style = PaintingStyle.stroke..strokeWidth = 2.4..strokeCap = StrokeCap.round);
-  }
-
-  @override
-  bool shouldRepaint(_SparkPainter o) => o.v.length != v.length || o.c != c || !_same(o.v, v);
-  static bool _same(List<double> a, List<double> b) {
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
   }
 }

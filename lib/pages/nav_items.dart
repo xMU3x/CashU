@@ -86,8 +86,7 @@ class _NavCustomizeState extends State<NavCustomizePage> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           buildDefaultDragHandles: false,
-          onReorder: (o, n) {
-            if (n > o) n--;
+          onReorderItem: (o, n) {
             setState(() => ids.insert(n, ids.removeAt(o)));
             _save();
           },

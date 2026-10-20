@@ -22,7 +22,6 @@ class SubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Pal.of(context);
-    final top = MediaQuery.of(context).padding.top;
     return Scaffold(
       backgroundColor: p.bg,
       body: Stack(children: [

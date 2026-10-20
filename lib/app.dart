@@ -17,7 +17,6 @@ import 'pages/more_tab.dart';
 import 'pages/nav_items.dart';
 import 'ui/widgets.dart' show flowRoute;
 import 'ui/anim.dart';
-import 'ui/ios.dart';
 import 'ui/theme.dart';
 
 class CashUApp extends StatelessWidget {
