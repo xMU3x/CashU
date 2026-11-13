@@ -1,0 +1,11 @@
+// يوقّف فحص Android Lint «الحيوي» (lintVital*) اللي بيشتغل تلقائيًا مع assembleRelease.
+// السبب: الفحص ده كان بيكسر بناء الـ APK بـ RuntimeException جوه LintDriver.handleDetectorError (انهيار داخل كاشف Lint نفسه،
+// مش خطأ في كود التطبيق)، وهو مجرد فحص إضافي ملوش تأثير على ناتج الـ APK.
+// الاسم بيبدأ بـ lintVital فقط (lintVitalAnalyzeRelease / lintVitalReportRelease / lintVitalRelease ...) — مفيش تأثير على باقي مهام البناء.
+allprojects { p ->
+    p.tasks.configureEach { t ->
+        if (t.name.startsWith('lintVital')) {
+            t.enabled = false
+        }
+    }
+}
