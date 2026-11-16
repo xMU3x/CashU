@@ -1,0 +1,265 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1232" viewBox="0 0 380 616" xmlns:c2pa="http://c2pa.org/manifest">
+<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A2E3A"/><stop offset="1" stop-color="#12141A"/></linearGradient></defs>
+<rect width="380" height="616" fill="url(#wall)"/>
+<g font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#9AA3B2" text-anchor="middle">
+<g transform="translate(110,20) scale(1.6667)">
+<defs>
+<linearGradient id="i0bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#293452"/><stop offset="1" stop-color="#0A1127"/></linearGradient>
+<linearGradient id="i0rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i0gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i0sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i0ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i0ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i0dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i0cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i0ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i0as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i0dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#2EE6A6" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#0F1B3D"/>
+<rect width="96" height="96" rx="26" fill="url(#i0bg)"/>
+<g clip-path="url(#i0cl)">
+<rect width="96" height="50" fill="url(#i0gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i0sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i0ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i0ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i0dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="190.002" y="198.003">Navy (main)</text>
+<g transform="translate(20,220) scale(1)">
+<defs>
+<linearGradient id="i1bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#252525"/><stop offset="1" stop-color="#060606"/></linearGradient>
+<linearGradient id="i1rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i1gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i1sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i1ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i1ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i1dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i1cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i1ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i1as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i1dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#2EE6A6" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#0A0A0A"/>
+<rect width="96" height="96" rx="26" fill="url(#i1bg)"/>
+<g clip-path="url(#i1cl)">
+<rect width="96" height="50" fill="url(#i1gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i1sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i1ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i1ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i1dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="68" y="336">Black</text>
+<g transform="translate(142,220) scale(1)">
+<defs>
+<linearGradient id="i2bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#467BE3"/><stop offset="1" stop-color="#1E448F"/></linearGradient>
+<linearGradient id="i2rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i2gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i2sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i2ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i2ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i2dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i2cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i2ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i2as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i2dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#2EE6A6" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#2F6BE0"/>
+<rect width="96" height="96" rx="26" fill="url(#i2bg)"/>
+<g clip-path="url(#i2cl)">
+<rect width="96" height="50" fill="url(#i2gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i2sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i2ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i2ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i2dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="190" y="336">Blue</text>
+<g transform="translate(264,220) scale(1)">
+<defs>
+<linearGradient id="i3bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#71EEC2"/><stop offset="1" stop-color="#25B885"/></linearGradient>
+<linearGradient id="i3rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.75"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i3gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i3sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.16"/></linearGradient>
+<linearGradient id="i3ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22357A"/><stop offset="1" stop-color="#0A1330"/></linearGradient>
+<linearGradient id="i3ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i3dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></radialGradient>
+<clipPath id="i3cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i3ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i3as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#0F1B3D" flood-opacity="0.28"/></filter>
+<filter id="i3dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#0F1B3D" flood-opacity="0.28"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#2EE6A6"/>
+<rect width="96" height="96" rx="26" fill="url(#i3bg)"/>
+<g clip-path="url(#i3cl)">
+<rect width="96" height="50" fill="url(#i3gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i3sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i3ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i3ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+<circle cx="48" cy="66" r="7" fill="url(#i3dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="312" y="336">Mint</text>
+<g transform="translate(20,350) scale(1)">
+<defs>
+<linearGradient id="i4bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#265245"/><stop offset="1" stop-color="#07271D"/></linearGradient>
+<linearGradient id="i4rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i4gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i4sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i4ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i4ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i4dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i4cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i4ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i4as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i4dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#2EE6A6" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#0B3D2E"/>
+<rect width="96" height="96" rx="26" fill="url(#i4bg)"/>
+<g clip-path="url(#i4cl)">
+<rect width="96" height="50" fill="url(#i4gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i4sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i4ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i4ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i4dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="68" y="466">Deep green</text>
+<g transform="translate(142,350) scale(1)">
+<defs>
+<linearGradient id="i5bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#293452"/><stop offset="1" stop-color="#0A1127"/></linearGradient>
+<linearGradient id="i5rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i5gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i5sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i5ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i5ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i5dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#FFE6A8"/><stop offset=".5" stop-color="#FFC83D"/><stop offset="1" stop-color="#B8902C"/></radialGradient>
+<clipPath id="i5cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i5ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i5as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i5dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#FFC83D" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#0F1B3D"/>
+<rect width="96" height="96" rx="26" fill="url(#i5bg)"/>
+<g clip-path="url(#i5cl)">
+<rect width="96" height="50" fill="url(#i5gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i5sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i5ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i5ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i5dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="190" y="466">Navy + gold</text>
+<g transform="translate(264,350) scale(1)">
+<defs>
+<linearGradient id="i6bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#293452"/><stop offset="1" stop-color="#0A1127"/></linearGradient>
+<linearGradient id="i6rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i6gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i6sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i6ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CF8D8"/><stop offset="1" stop-color="#14BF86"/></linearGradient>
+<linearGradient id="i6ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i6dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></radialGradient>
+<clipPath id="i6cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i6ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i6as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i6dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#000000" flood-opacity="0.5"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#0F1B3D"/>
+<rect width="96" height="96" rx="26" fill="url(#i6bg)"/>
+<g clip-path="url(#i6cl)">
+<rect width="96" height="50" fill="url(#i6gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i6sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i6ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i6ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+<circle cx="48" cy="66" r="7" fill="url(#i6dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="312" y="466">Navy + mint arc</text>
+<g transform="translate(20,480) scale(1)">
+<defs>
+<linearGradient id="i7bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#B7C5E8"/></linearGradient>
+<linearGradient id="i7rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.9"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i7gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i7sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.1"/></linearGradient>
+<linearGradient id="i7ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22357A"/><stop offset="1" stop-color="#0A1330"/></linearGradient>
+<linearGradient id="i7ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i7dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i7cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i7ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i7as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#0F1B3D" flood-opacity="0.28"/></filter>
+<filter id="i7dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#0F1B3D" flood-opacity="0.28"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#E8EFFF"/>
+<rect width="96" height="96" rx="26" fill="url(#i7bg)"/>
+<g clip-path="url(#i7cl)">
+<rect width="96" height="50" fill="url(#i7gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i7sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i7ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i7ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+<circle cx="48" cy="66" r="7" fill="url(#i7dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="68" y="596">Light</text>
+<g transform="translate(142,480) scale(1)">
+<defs>
+<linearGradient id="i8bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#375097"/><stop offset="1" stop-color="#132558"/></linearGradient>
+<linearGradient id="i8rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i8gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i8sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i8ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i8ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i8dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i8cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i8ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i8as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i8dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#2EE6A6" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#1E3A8A"/>
+<rect width="96" height="96" rx="26" fill="url(#i8bg)"/>
+<g clip-path="url(#i8cl)">
+<rect width="96" height="50" fill="url(#i8gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i8sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i8ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i8ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i8dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="190" y="596">Royal blue</text>
+<g transform="translate(264,480) scale(1)">
+<defs>
+<linearGradient id="i9bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C60F3"/><stop offset="1" stop-color="#45319A"/></linearGradient>
+<linearGradient id="i9rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.5"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="i9gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="i9sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/></linearGradient>
+<linearGradient id="i9ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#BCC9EA"/></linearGradient>
+<linearGradient id="i9ah" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".7"/><stop offset=".7" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="i9dt" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A1F4D7"/><stop offset=".5" stop-color="#2EE6A6"/><stop offset="1" stop-color="#21A678"/></radialGradient>
+<clipPath id="i9cl"><rect width="96" height="96" rx="26"/></clipPath>
+<filter id="i9ts" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3.5" stdDeviation="3.5" flood-color="#000" flood-opacity=".45"/></filter>
+<filter id="i9as" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.5"/></filter>
+<filter id="i9dg" x="-150%" y="-150%" width="400%" height="400%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#2EE6A6" flood-opacity=".85"/></filter>
+</defs>
+<rect width="96" height="96" rx="26" fill="#6C4CF1"/>
+<rect width="96" height="96" rx="26" fill="url(#i9bg)"/>
+<g clip-path="url(#i9cl)">
+<rect width="96" height="50" fill="url(#i9gl)"/>
+<rect y="40" width="96" height="56" fill="url(#i9sh)"/>
+</g>
+<path d="M22 64 A26 26 0 0 1 74 64" fill="none" stroke="url(#i9ar)" stroke-width="12" stroke-linecap="round"/>
+<path d="M18.5 62 A29.5 29.5 0 0 1 77.5 62" fill="none" stroke="url(#i9ah)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+<circle cx="48" cy="66" r="7" fill="url(#i9dt)"/>
+<ellipse cx="45.6" cy="63.4" rx="2.6" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-25 45.6 63.4)"/>
+</g>
+<text x="312" y="596">Violet</text>
+</g></svg>
