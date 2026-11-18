@@ -1,0 +1,21 @@
+// يوحّد Java وKotlin على JVM 17 في كل وحدات Gradle (التطبيق + إضافات Flutter).
+// السبب: بعض الإضافات (مثل flutter_timezone) تضبط Java على 11 داخل build.gradle الخاص بها بينما Kotlin يترجم على 17
+// فيفشل `compileReleaseKotlin` بخطأ "Inconsistent JVM-target compatibility".
+// يُنفَّذ كـ init script بعد تقييم كل مشروع (afterEvaluate) حتى يغلب إعدادات الإضافة نفسها.
+allprojects { p ->
+    p.afterEvaluate {
+        def android = p.extensions.findByName('android')
+        if (android != null) {
+            android.compileOptions.sourceCompatibility = JavaVersion.VERSION_17
+            android.compileOptions.targetCompatibility = JavaVersion.VERSION_17
+        }
+        p.tasks.matching { it.class.name.startsWith('org.jetbrains.kotlin.gradle.tasks.KotlinCompile') }.configureEach { t ->
+            try {
+                def jt = t.compilerOptions.jvmTarget
+                jt.set(Enum.valueOf(jt.get().getClass(), 'JVM_17'))
+            } catch (Throwable e1) {
+                try { t.kotlinOptions.jvmTarget = '17' } catch (Throwable e2) { }
+            }
+        }
+    }
+}
