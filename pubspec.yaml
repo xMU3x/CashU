@@ -1,0 +1,67 @@
+name: cashu
+description: CashU — تتبّع المصاريف وتتبّع رسائل البنك محليًا، مع مزامنة Supabase.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.14.0 <4.0.0' # Dart 3.14 = Flutter 3.50
+  flutter: '>=3.50.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Flutter 3.50: Material وCupertino بقوا حزم مستقلة (المكتبات المدمجة في الـ SDK اتعلّمت deprecated) — والـ localizations بقت جواهم
+  material_ui: ^1.6.0
+  cupertino_ui: ^1.1.2
+  supabase_flutter: ^2.8.0
+  shared_preferences: ^2.3.2
+  http: ^1.2.2
+  share_plus: ^10.1.4
+  url_launcher: ^6.3.1
+  lottie: ^3.3.1 # رسوم Lottie أصلية (assets/lottie): نجاح/فاضي/لودينج — المدد من CashUMotion
+  image_picker: ^1.1.2
+  # إشعارات محلية مجدولة (تعمل بدون إنترنت). الإصدار مثبّت لأن الـ API بيتغيّر بين الإصدارات الكبيرة.
+  flutter_local_notifications: 19.5.0
+  timezone: ^0.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/brand/app_icon.png
+  adaptive_icon_background: assets/brand/app_icon_bg.png
+  adaptive_icon_foreground: assets/brand/app_icon_fg.png
+  adaptive_icon_monochrome: assets/brand/app_icon_mono.png
+  min_sdk_android: 24 # flutter.minSdkVersion الافتراضي في Flutter 3.50 = API 24
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/
+    - assets/services/
+    - assets/lottie/
+  fonts:
+    # Ping AR + LT (خط عربي/إنجليزي واحد) — خط تجاري: لازم يكون عندك ترخيص استخدام له.
+    - family: PingARLT
+      fonts:
+        - asset: assets/fonts/PingARLT-Thin.otf
+          weight: 100
+        - asset: assets/fonts/PingARLT-Extralight.otf
+          weight: 200
+        - asset: assets/fonts/PingARLT-Light.otf
+          weight: 300
+        - asset: assets/fonts/PingARLT-Regular.otf
+          weight: 400
+        - asset: assets/fonts/PingARLT-Medium.otf
+          weight: 500
+        - asset: assets/fonts/PingARLT-Bold.otf
+          weight: 700
+        - asset: assets/fonts/PingARLT-Heavy.otf
+          weight: 800
+        - asset: assets/fonts/PingARLT-Black.otf
+          weight: 900
